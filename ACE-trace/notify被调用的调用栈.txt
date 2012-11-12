@@ -1,0 +1,41 @@
+register_handler之后notify被调用的调用栈
+
+>	ACEd.dll!ACE_OS::send(void * handle=0x00001754, const char * buf=0x00ecfd30, unsigned int len=8, int flags=0)  Line 594	C++
+ 	ACEd.dll!ACE::send_i(void * handle=0x00001754, const void * buf=0x00ecfd30, unsigned int len=8)  Line 224 + 0x13 bytes	C++
+ 	ACEd.dll!ACE::send(void * handle=0x00001754, const void * buf=0x00ecfd30, unsigned int n=8, const ACE_Time_Value * timeout=0x00000000)  Line 1275 + 0x11 bytes	C++
+ 	ACEd.dll!ACE_Select_Reactor_Notify::notify(ACE_Event_Handler * event_handler=0x00000000, unsigned long mask=4, ACE_Time_Value * timeout=0x00000000)  Line 719 + 0x1b bytes	C++
+ 	test.exe!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::notify(ACE_Event_Handler * eh=0x00000000, unsigned long mask=4, ACE_Time_Value * timeout=0x00000000)  Line 213 + 0x29 bytes	C++
+ 	ACEd.dll!ACE_Reactor::notify(ACE_Event_Handler * event_handler=0x00000000, unsigned long mask=4, ACE_Time_Value * tv=0x00000000)  Line 481 + 0x29 bytes	C++
+ 	ACEd.dll!ACE_Event_Handler::read_adapter(void * args=0x00ac115c)  Line 263	C++
+ 	ACEd.dll!ACE_Thread_Adapter::invoke_i()  Line 149 + 0x9 bytes	C++
+ 	ACEd.dll!ACE_Thread_Adapter::invoke()  Line 98 + 0xf bytes	C++
+ 	ACEd.dll!ace_thread_adapter(void * args=0x003ff880)  Line 124 + 0xf bytes	C++
+ 	msvcr80d.dll!_callthreadstartex()  Line 348 + 0xf bytes	C
+ 	msvcr80d.dll!_threadstartex(void * ptd=0x003ffb48)  Line 331	C
+ 	kernel32.dll!7c80b729() 	
+ 	[Frames below may be incorrect and/or missing, no symbols loaded for kernel32.dll]	
+
+
+remove_handler时notify被调用的调用栈
+
+>	ACEd.dll!ACE_OS::send(void * handle=0x0000174c, const char * buf=0x00dcf710, unsigned int len=8, int flags=0)  Line 572	C++
+ 	ACEd.dll!ACE::send_i(void * handle=0x0000174c, const void * buf=0x00dcf710, unsigned int len=8)  Line 224 + 0x13 bytes	C++
+ 	ACEd.dll!ACE::send(void * handle=0x0000174c, const void * buf=0x00dcf710, unsigned int n=8, const ACE_Time_Value * timeout=0x00000000)  Line 1275 + 0x11 bytes	C++
+ 	ACEd.dll!ACE_Select_Reactor_Notify::notify(ACE_Event_Handler * event_handler=0x00000000, unsigned long mask=4, ACE_Time_Value * timeout=0x00000000)  Line 719 + 0x1b bytes	C++
+ 	test.exe!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::notify(ACE_Event_Handler * eh=0x00000000, unsigned long mask=4, ACE_Time_Value * timeout=0x00000000)  Line 213 + 0x29 bytes	C++
+ 	test.exe!ACE_Reactor_Token_T<ACE_Token>::sleep_hook()  Line 64 + 0x20 bytes	C++
+ 	ACEd.dll!ACE_Token::shared_acquire(void (void *)* sleep_hook_func=0x00000000, void * arg=0x00000000, ACE_Time_Value * timeout=0x00000000, ACE_Token::ACE_Token_Op_Type op_type=WRITE_TOKEN)  Line 254 + 0xf bytes	C++
+ 	ACEd.dll!ACE_Token::acquire(ACE_Time_Value * timeout=0x00000000)  Line 340	C++
+ 	test.exe!ACE_Guard<ACE_Reactor_Token_T<ACE_Token> >::acquire()  Line 12 + 0xf bytes	C++
+ 	test.exe!ACE_Guard<ACE_Reactor_Token_T<ACE_Token> >::ACE_Guard<ACE_Reactor_Token_T<ACE_Token> >(ACE_Reactor_Token_T<ACE_Token> & l={...})  Line 39	C++
+ 	test.exe!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::remove_handler(void * handle=0x00000003, unsigned long mask=1)  Line 347 + 0x11 bytes	C++
+ 	ACEd.dll!ACE_Reactor::remove_handler(void * handle=0x00000003, unsigned long mask=1)  Line 244 + 0x22 bytes	C++
+ 	test.exe!MyTask2::svc()  Line 234 + 0x2d bytes	C++
+ 	ACEd.dll!ACE_Task_Base::svc_run(void * args=0x00ac115c)  Line 275 + 0xf bytes	C++
+ 	ACEd.dll!ACE_Thread_Adapter::invoke_i()  Line 149 + 0x9 bytes	C++
+ 	ACEd.dll!ACE_Thread_Adapter::invoke()  Line 98 + 0xf bytes	C++
+ 	ACEd.dll!ace_thread_adapter(void * args=0x00ad4800)  Line 124 + 0xf bytes	C++
+ 	msvcr80d.dll!_callthreadstartex()  Line 348 + 0xf bytes	C
+ 	msvcr80d.dll!_threadstartex(void * ptd=0x00ad4ac8)  Line 331	C
+ 	kernel32.dll!7c80b729() 	
+ 	[Frames below may be incorrect and/or missing, no symbols loaded for kernel32.dll]	

@@ -1,0 +1,215 @@
+(gdb) p this
+$57 = (ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> > * const) 0x806cba8
+(gdb) p *this
+$58 = 
+{
+    <ACE_Select_Reactor_Impl> = 
+    {
+        <ACE_Reactor_Impl> = 
+        {
+            _vptr.ACE_Reactor_Impl = 0x805fcc8
+        }, 
+        
+        //ACE_Select_Reactor_Handler_Repository handler_rep_;
+        handler_rep_ = 
+        {
+            //ACE_Select_Reactor_Impl &select_reactor_;
+            select_reactor_ = @0x806cba8, //it is 'this' pointer, that is, ACE_Select_Reactor
+            
+            //max_handlep1_type max_handlep1_;
+            max_handlep1_ = 8, 
+
+            //typedef ACE_Event_Handler * value_type;            
+            //typedef ACE_Array_Base<value_type> map_type;
+            //map_type event_handlers_;
+            event_handlers_ = 
+            {
+                max_size_ = 1024, 
+                cur_size_ = 1024, 
+                array_ = 0x806d4f8, 
+                allocator_ = 0xfebd80
+            }
+        }, 
+        
+        ...
+    }
+    ...
+}
+(gdb) p (ACE_Allocator*)0xfebd80
+$73 = (ACE_Allocator *) 0xfebd80
+
+(gdb) p *0xfebd80@4
+$74 = {16673896, 0, 0, 0}
+
+(gdb) p *(ACE_Allocator*)0xfebd80
+$75 = {_vptr.ACE_Allocator = 0xfe6c68, static allocator_ = 0xfebd80, static delete_allocator_ = 0}
+
+//hanlder_rep_.event_handlers_.array_
+(gdb) p *0x806d4f8@100
+$76 = {0, 0, 0, 0, 0, 134665416, 0, -1208040860, 0 <repeats 92 times>}
+
+(gdb) p/x *0x806d4f8@100
+$77 = {0x0, 0x0, 0x0, 0x0, 0x0, 0x806d4c8, 0x0, 0xb7fec264, 0x0 <repeats 92 times>}
+
+(gdb) x/20 0x806d4f8
+0x806d4f8:      0x00000000      0x00000000      0x00000000      0x00000000
+0x806d508:      0x00000000      0x0806d4c8      0x00000000      0xb7fec264
+0x806d518:      0x00000000      0x00000000      0x00000000      0x00000000
+0x806d528:      0x00000000      0x00000000      0x00000000      0x00000000
+0x806d538:      0x00000000      0x00000000      0x00000000      0x00000000
+
+(gdb) bt
+#0  ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch (this=0x806cba8, active_handle_count=0, dispatch_set=...)
+    at /usr/local/include/ace/Select_Reactor_T.cpp:1309
+#1  0x0805e0b4 in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events_i (this=0x806cba8, max_wait_time=0xb7fec21c)
+    at /usr/local/include/ace/Select_Reactor_T.cpp:1442
+#2  0x0805a167 in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events (this=0x806cba8, max_wait_time=0xb7fec21c)
+    at /usr/local/include/ace/Select_Reactor_T.cpp:1419
+#3  0x0805a1fb in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events (this=0x806cba8, max_wait_time=...)
+    at /usr/local/include/ace/Select_Reactor_T.cpp:759
+#4  0x0805513c in ACE_Reactor::handle_events (this=0x806e500, max_wait_time=...) at /usr/local/include/ace/Reactor.inl:200
+#5  0x080534ff in MyTask::svc (this=0x806a774) at server8.cpp:154
+#6  0x00f9cb52 in ACE_Task_Base::svc_run (args=0x806a774) at ../../ace/Task.cpp:275
+#7  0x00f9deed in ACE_Thread_Adapter::invoke_i (this=0x806a9f0) at ../../ace/Thread_Adapter.cpp:149
+#8  0x00f9df65 in ACE_Thread_Adapter::invoke (this=0x806a9f0) at ../../ace/Thread_Adapter.cpp:98
+#9  0x00f145c1 in ace_thread_adapter (args=0x806a9f0) at ../../ace/Base_Thread_Adapter.cpp:124
+#10 0x00e3f80e in start_thread () from /lib/tls/i686/cmov/libpthread.so.0
+#11 0x003ee7ee in clone () from /lib/tls/i686/cmov/libc.so.6
+
+1. ACE_Select_Reactor_Handler_Repository definition
+
+//file: ace/Select_Reactor_Base.h
+
+/**
+ * @class ACE_Select_Reactor_Handler_Repository
+ *
+ * @brief Used to map ACE_HANDLEs onto the appropriate
+ * ACE_Event_Handler *.
+ *
+ * This class is necessary to shield differences between UNIX
+ * and Win32.  In UNIX, ACE_HANDLE is an int, whereas in Win32
+ * it's a void *.  This class hides all these details from the
+ * bulk of the ACE_Select_Reactor code.  All of these methods
+ * are called with the main <Select_Reactor> token lock held.
+ */
+class ACE_Export ACE_Select_Reactor_Handler_Repository
+{
+public:
+    friend class ACE_Select_Reactor_Handler_Repository_Iterator;
+  
+    typedef ACE_HANDLE          key_type;
+    typedef ACE_Event_Handler * value_type;
+  
+    // = The mapping from <HANDLES> to <Event_Handlers>.
+  #ifdef ACE_WIN32
+    /**
+     * The NT version implements this via a hash map
+     * @c ACE_Event_Handler*.  Since NT implements @c ACE_HANDLE
+     * as a void * we can't directly index into this array.  Therefore,
+     * we must explicitly map @c ACE_HANDLE to @c ACE_Event_Handler.
+     */
+    typedef ACE_Hash_Map_Manager_Ex<key_type,
+                                    value_type,
+                                    ACE_Hash<key_type>,
+                                    std::equal_to<key_type>,
+                                    ACE_Null_Mutex> map_type;
+  
+    typedef map_type::size_type max_handlep1_type;
+  #else
+    /**
+     * The UNIX version implements this via a dynamically allocated
+     * array of @c ACE_Event_Handler* that is indexed directly using
+     * the @c ACE_HANDLE value.
+     */
+    typedef ACE_Array_Base<value_type> map_type;
+    typedef ACE_HANDLE max_handlep1_type;
+  #endif  /* ACE_WIN32 */
+  
+    typedef map_type::size_type size_type;
+  
+    // = Initialization and termination methods.
+    /// Default "do-nothing" constructor.
+    ACE_Select_Reactor_Handler_Repository (ACE_Select_Reactor_Impl &);
+  
+    //...
+  
+private:
+    /// Reference to our @c Select_Reactor.
+    ACE_Select_Reactor_Impl &select_reactor_;
+  
+  #ifndef ACE_WIN32
+    /// The highest currently active handle, plus 1 (ranges between 0 and
+    /// @c max_size_.
+    max_handlep1_type max_handlep1_;
+  #endif  /* !ACE_WIN32 */
+  
+    /// Underlying table of event handlers.
+    map_type event_handlers_;
+};
+
+
+2. ACE_Array_Base definition
+
+//file: ace/Array_Base.h
+
+/**
+ * @class ACE_Array_Base
+ *
+ * @brief Implement a simple dynamic array
+ *
+ * This parametric class implements a simple dynamic array;
+ * resizing must be controlled by the user. No comparison or find
+ * operations are implemented.
+ */
+template<class T>
+class ACE_Array_Base
+{
+public:
+
+    // Old/ACE-style traits.
+    typedef T TYPE;
+    typedef ACE_Array_Iterator<T> ITERATOR;
+    
+    // STL-style typedefs/traits.
+    typedef T                              value_type;
+    typedef value_type *                   iterator;
+    typedef value_type const *             const_iterator;
+    typedef value_type &                   reference;
+    typedef value_type const &             const_reference;
+    typedef value_type *                   pointer;
+    typedef value_type const *             const_pointer;
+    typedef ptrdiff_t                      difference_type;
+    typedef ACE_Allocator::size_type       size_type;
+    
+    //...
+    
+protected:
+    
+    //...
+    
+    /// Maximum size of the array, i.e., the total number of <T> elements
+    /// in <array_>.
+    size_type max_size_;
+    
+    /**
+     * Current size of the array.  This starts out being == to
+     * <max_size_>.  However, if we are assigned a smaller array, then
+     * <cur_size_> will become less than <max_size_>.  The purpose of
+     * keeping track of both sizes is to avoid reallocating memory if we
+     * don't have to.
+     */
+    size_type cur_size_;
+    
+    /// Pointer to the array's storage buffer.
+    value_type * array_;
+    
+    /// Allocation strategy of the ACE_Array_Base.
+    ACE_Allocator * allocator_;
+    
+    friend class ACE_Array_Iterator<T>;
+};
+
+3. ACE_Event_Handler definition
+
+
+4. 

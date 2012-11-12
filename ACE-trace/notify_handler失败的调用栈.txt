@@ -1,0 +1,20 @@
+>	ACEd.dll!ACE_Select_Reactor_Handler_Repository::unbind(void * handle=0x00000714, ACE_Hash_Map_Iterator_Ex<void *,ACE_Event_Handler *,ACE_Hash<void *>,std::equal_to<void *>,ACE_Null_Mutex> pos={...}, unsigned long mask=1)  Line 397 + 0x17 bytes	C++
+ 	ACEd.dll!ACE_Select_Reactor_Handler_Repository::unbind(void * handle=0x00000714, unsigned long mask=1)  Line 40 + 0x51 bytes	C++
+ 	test.exe!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::remove_handler_i(void * handle=0x00000714, unsigned long mask=1)  Line 1007 + 0x16 bytes	C++
+ 	test.exe!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::notify_handle(void * handle=0x00000714, unsigned long mask=1, ACE_Handle_Set & ready_mask={...}, ACE_Event_Handler * event_handler=0x00dcfe24, int (void *)* ptmf=0x0041164a)  Line 815 + 0x1a bytes	C++
+ 	test.exe!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch_io_set(int number_of_active_handles=1, int & number_of_handlers_dispatched=1, int mask=1, ACE_Handle_Set & dispatch_mask={...}, ACE_Handle_Set & ready_mask={...}, int (void *)* callback=0x0041164a)  Line 1204 + 0x3c bytes	C++
+ 	test.exe!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch_io_handlers(ACE_Select_Reactor_Handle_Set & dispatch_set={...}, int & number_of_active_handles=1, int & number_of_handlers_dispatched=1)  Line 1263 + 0x30 bytes	C++
+ 	test.exe!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch(int active_handle_count=1, ACE_Select_Reactor_Handle_Set & dispatch_set={...})  Line 1365 + 0x1e bytes	C++
+ 	test.exe!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events_i(ACE_Time_Value * max_wait_time=0x00cbfdd4)  Line 1444 + 0x1d bytes	C++
+ 	test.exe!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events(ACE_Time_Value * max_wait_time=0x00cbfdd4)  Line 1419 + 0xc bytes	C++
+ 	test.exe!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events(ACE_Time_Value & max_wait_time={...})  Line 759 + 0x13 bytes	C++
+ 	ACEd.dll!ACE_Reactor::handle_events(ACE_Time_Value & max_wait_time={...})  Line 200 + 0x1e bytes	C++
+ 	test.exe!MyTask::svc()  Line 154 + 0x12 bytes	C++
+ 	ACEd.dll!ACE_Task_Base::svc_run(void * args=0x003fce3c)  Line 275 + 0xf bytes	C++
+ 	ACEd.dll!ACE_Thread_Adapter::invoke_i()  Line 149 + 0x9 bytes	C++
+ 	ACEd.dll!ACE_Thread_Adapter::invoke()  Line 98 + 0xf bytes	C++
+ 	ACEd.dll!ace_thread_adapter(void * args=0x003fd200)  Line 124 + 0xf bytes	C++
+ 	msvcr80d.dll!_callthreadstartex()  Line 348 + 0xf bytes	C
+ 	msvcr80d.dll!_threadstartex(void * ptd=0x003fd4f8)  Line 331	C
+ 	kernel32.dll!7c80b729() 	
+ 	[Frames below may be incorrect and/or missing, no symbols loaded for kernel32.dll]	

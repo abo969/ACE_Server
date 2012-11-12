@@ -1,0 +1,14 @@
+#! /usr/bin/expect -f
+
+spawn ./server97d
+expect -exact "$ input command >"
+send -- "s\r"
+expect -exact "in Handler()"
+expect -exact "exit MyTask2::svc()"
+expect "leaving ACE_Select_Reactor_T::wait_for_multiple_events"
+exec ./client 2>/dev/null
+exec ./client 2>/dev/null
+expect -exact "exit MyTask::svc()"
+expect -exact "$ input command >"
+send -- "q\r"
+expect -exact "in MyTask::~MyTask() 1"

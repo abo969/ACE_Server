@@ -1,0 +1,155 @@
+为什么在另一线程中remove自定义的handler会引起notify的调用？
+
+ACE_Token::in_use_ > 0
+ACE_Thread::self ()和ACE_Token::owner_不相同
+
+
+# gdb ./server81
+GNU gdb (GDB) 7.0-ubuntu
+Copyright (C) 2009 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "i486-linux-gnu".
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>...
+Reading symbols from /mnt/hgfs/programming/win32/Server/server81...done.
+(gdb) b MyTask::svc() 
+Breakpoint 1 at 0x8053345: file server81.cpp, line 125.
+(gdb) r
+Starting program: /mnt/hgfs/programming/win32/Server/server81 
+[Thread debugging using libthread_db enabled]
+---------------------------------------------
+input command to test the program
+ s or S : start the talker (ACE Task)
+ q or Q : quit
+---------------------------------------------
+$ input command >s
+(3086931664) main::start
+(3086931664) MyTask start
+[New Thread 0xb7fecb70 (LWP 4186)]
+[Switching to Thread 0xb7fecb70 (LWP 4186)]
+
+Breakpoint 1, MyTask::svc (this=0x806a774) at server81.cpp:125
+125     {
+(gdb) b server81.cpp:211
+Breakpoint 2 at 0x8053a86: file server81.cpp, line 211.
+(gdb) b server81.cpp:217
+Breakpoint 3 at 0x8053b11: file server81.cpp, line 217.
+(gdb) c
+Continuing.
+(3086928752) enter MyTask::svc()
+
+(3086928752) in Handler()
+
+(3086928752) MyTask2 start
+[New Thread 0xb77ebb70 (LWP 4187)]
+(3078536048) enter MyTask2::svc()
+
+(3078536048) MyTask2::svc() register ACE_STDIN handler
+(3086928752) handle_events() succeed, result = 1
+
+(3078536048) MyTask2::svc() remove ACE_STDIN handler
+
+[Switching to Thread 0xb77ebb70 (LWP 4187)]
+
+Breakpoint 2, MyTask2::svc (this=0x806f5c4) at server81.cpp:211
+211             if (ACE_Reactor::instance()->remove_handler(ACE_STDIN, ACE_Event_Handler::READ_MASK) == -1)
+(gdb) b ACE_Token::shared_acquire(void (*)(void*), void*, ACE_Time_Value*, ACE_Token::ACE_Token_Op_Type) 
+Breakpoint 4 at 0xe7faca: file ../../ace/Token.cpp, line 188.
+(gdb) b Token.cpp:199
+Breakpoint 5 at 0xe7fb01: file ../../ace/Token.cpp, line 199.
+(gdb) b Token.cpp:212
+Breakpoint 6 at 0xe7fb0f: file ../../ace/Token.cpp, line 212.
+(gdb) c
+Continuing.
+
+Breakpoint 4, ACE_Token::shared_acquire (this=0x806d278, sleep_hook_func=0, arg=0x0, timeout=0x0, op_type=ACE_Token::WRITE_TOKEN)
+    at ../../ace/Token.cpp:188
+188     {
+(gdb) bt
+#0  ACE_Token::shared_acquire (this=0x806d278, sleep_hook_func=0, arg=0x0, timeout=0x0, op_type=ACE_Token::WRITE_TOKEN)
+    at ../../ace/Token.cpp:188
+#1  0x00e7fdec in ACE_Token::acquire (this=0x806d278, timeout=0x0) at ../../ace/Token.cpp:339
+#2  0x08057125 in ACE_Guard<ACE_Reactor_Token_T<ACE_Token> >::acquire (this=0xb77eb218) at /usr/local/include/ace/Guard_T.inl:12
+#3  0x08056a55 in ACE_Guard (this=0xb77eb218, l=...) at /usr/local/include/ace/Guard_T.inl:38
+#4  0x0805a713 in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::remove_handler (this=0x806cba8, handle=0, mask=1)
+    at /usr/local/include/ace/Select_Reactor_T.cpp:347
+#5  0x08055221 in ACE_Reactor::remove_handler (this=0x806e500, handle=0, mask=1) at /usr/local/include/ace/Reactor.inl:244
+#6  0x08053aa3 in MyTask2::svc (this=0x806f5c4) at server81.cpp:211
+#7  0x00e75b52 in ACE_Task_Base::svc_run (args=0x806f5c4) at ../../ace/Task.cpp:275
+#8  0x00e76eed in ACE_Thread_Adapter::invoke_i (this=0x806f6e0) at ../../ace/Thread_Adapter.cpp:149
+#9  0x00e76f65 in ACE_Thread_Adapter::invoke (this=0x806f6e0) at ../../ace/Thread_Adapter.cpp:98
+#10 0x00ded5c1 in ace_thread_adapter (args=0x806f6e0) at ../../ace/Base_Thread_Adapter.cpp:124
+#11 0x00b6e80e in start_thread () from /lib/tls/i686/cmov/libpthread.so.0
+#12 0x0021a7ee in clone () from /lib/tls/i686/cmov/libc.so.6
+(gdb) c
+Continuing.
+
+Breakpoint 5, ACE_Token::shared_acquire (this=0x806d278, sleep_hook_func=0, arg=0x0, timeout=0x0, op_type=ACE_Token::WRITE_TOKEN)
+    at ../../ace/Token.cpp:199
+199       if (!this->in_use_)
+(gdb) p *this
+$1 = {_vptr.ACE_Token = 0x805ffe0, writers_ = {head_ = 0x0, tail_ = 0x0}, readers_ = {head_ = 0x0, tail_ = 0x0}, lock_ = {lock_ = {
+      __data = {__lock = 1, __count = 0, __owner = 4187, __kind = 0, __nusers = 1, {__spins = 0, __list = {__next = 0x0}}}, 
+      __size = "\001\000\000\000\000\000\000\000[\020\000\000\000\000\000\000\001\000\000\000\000\000\000", __align = 1}, 
+    removed_ = false}, owner_ = 3086928752, in_use_ = 2, waiters_ = 0, nesting_level_ = 0, attributes_ = {attributes_ = {
+      __size = "\000\000\000", __align = 0}}, queueing_strategy_ = -1}
+(gdb) p this->in_use_ 
+$2 = 2
+(gdb) c
+Continuing.
+
+Breakpoint 6, ACE_Token::shared_acquire (this=0x806d278, sleep_hook_func=0, arg=0x0, timeout=0x0, op_type=ACE_Token::WRITE_TOKEN)
+    at ../../ace/Token.cpp:212
+212       if (ACE_OS::thr_equal (thr_id, this->owner_))
+(gdb) p thr_id 
+$3 = 3078536048
+(gdb) p this->owner_ 
+$4 = 3086928752
+(gdb) b Token.cpp:246
+Breakpoint 7 at 0xe7fb81: file ../../ace/Token.cpp, line 246.
+(gdb) c
+Continuing.
+
+Breakpoint 7, ACE_Token::shared_acquire (this=0x806d278, sleep_hook_func=0, arg=0x0, timeout=0x0, op_type=ACE_Token::WRITE_TOKEN)
+    at ../../ace/Token.cpp:246
+246       if (sleep_hook_func)
+(gdb) n
+240       ++this->waiters_;
+(gdb) 
+246       if (sleep_hook_func)
+(gdb) 
+254           this->sleep_hook ();
+(gdb) step
+ACE_Reactor_Token_T<ACE_Token>::sleep_hook (this=0x806d278) at /usr/local/include/ace/Reactor_Token_T.cpp:64
+64        if (this->reactor_->notify () == -1)
+(gdb) step
+ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::notify (this=0x806cba8, eh=0x0, mask=4, timeout=0x0)
+    at /usr/local/include/ace/Select_Reactor_T.cpp:213
+213       ssize_t const n = this->notify_handler_->notify (eh, mask, timeout);
+(gdb) 
+ACE_Select_Reactor_Notify::notify (this=0x806d4c8, event_handler=0x0, mask=4, timeout=0x0) at ../../ace/Select_Reactor_Base.cpp:688
+688       if (this->select_reactor_ == 0)
+(gdb) bt
+#0  ACE_Select_Reactor_Notify::notify (this=0x806d4c8, event_handler=0x0, mask=4, timeout=0x0) at ../../ace/Select_Reactor_Base.cpp:688
+#1  0x0805b249 in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::notify (this=0x806cba8, eh=0x0, mask=4, timeout=0x0)
+    at /usr/local/include/ace/Select_Reactor_T.cpp:213
+#2  0x0805cd00 in ACE_Reactor_Token_T<ACE_Token>::sleep_hook (this=0x806d278) at /usr/local/include/ace/Reactor_Token_T.cpp:64
+#3  0x00e7fd16 in ACE_Token::shared_acquire (this=0x806d278, sleep_hook_func=0, arg=0x0, timeout=0x0, op_type=ACE_Token::WRITE_TOKEN)
+    at ../../ace/Token.cpp:254
+#4  0x00e7fdec in ACE_Token::acquire (this=0x806d278, timeout=0x0) at ../../ace/Token.cpp:339
+#5  0x08057125 in ACE_Guard<ACE_Reactor_Token_T<ACE_Token> >::acquire (this=0xb77eb218) at /usr/local/include/ace/Guard_T.inl:12
+#6  0x08056a55 in ACE_Guard (this=0xb77eb218, l=...) at /usr/local/include/ace/Guard_T.inl:38
+#7  0x0805a713 in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::remove_handler (this=0x806cba8, handle=0, mask=1)
+    at /usr/local/include/ace/Select_Reactor_T.cpp:347
+#8  0x08055221 in ACE_Reactor::remove_handler (this=0x806e500, handle=0, mask=1) at /usr/local/include/ace/Reactor.inl:244
+#9  0x08053aa3 in MyTask2::svc (this=0x806f5c4) at server81.cpp:211
+#10 0x00e75b52 in ACE_Task_Base::svc_run (args=0x806f5c4) at ../../ace/Task.cpp:275
+#11 0x00e76eed in ACE_Thread_Adapter::invoke_i (this=0x806f6e0) at ../../ace/Thread_Adapter.cpp:149
+#12 0x00e76f65 in ACE_Thread_Adapter::invoke (this=0x806f6e0) at ../../ace/Thread_Adapter.cpp:98
+#13 0x00ded5c1 in ace_thread_adapter (args=0x806f6e0) at ../../ace/Base_Thread_Adapter.cpp:124
+#14 0x00b6e80e in start_thread () from /lib/tls/i686/cmov/libpthread.so.0
+#15 0x0021a7ee in clone () from /lib/tls/i686/cmov/libc.so.6
+(gdb) 

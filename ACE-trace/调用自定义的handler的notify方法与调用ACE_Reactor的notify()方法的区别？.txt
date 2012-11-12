@@ -1,0 +1,340 @@
+调用自定义的handler的notify方法与调用ACE_Reactor的notify()方法的区别？
+
+
+1. 调用ACE_Reactor的notify方法分析
+
+调用方法：ACE_Reactor::instance()->notify();
+
+handle_events call stack
+
+->ACE_Reactor::handle_events
+ ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events(ACE_Time_Value &max_wait_time)
+  ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events(ACE_Time_Value *max_wait_time)
+   ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events_i
+    ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch
+     ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch_notification
+      ->ACE_Select_Reactor_Notify::dispatch_notifications
+       ->ACE_Select_Reactor_Notify::handle_input
+        ->ACE_Select_Reactor_Notify::dispatch_notify
+
+
+# g++ -g -o server1 server1.cpp -lACE -lpthread
+# gdb ./server1
+GNU gdb (GDB) 7.0-ubuntu
+Copyright (C) 2009 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "i486-linux-gnu".
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>...
+Reading symbols from /mnt/hgfs/programming/win32/Server/server1...done.
+(gdb) b MyTask::svc() 
+Breakpoint 1 at 0x804b914: file server1.cpp, line 92.
+(gdb) r
+Starting program: /mnt/hgfs/programming/win32/Server/server1 
+[Thread debugging using libthread_db enabled]
+---------------------------------------------
+input command to test the program
+ s or S : start the talker (ACE Task)
+ q or Q : quit
+---------------------------------------------
+$ input command >s
+(3086931664) main::start
+(3086931664) MyTask start
+[New Thread 0xb7fecb70 (LWP 29843)]
+[Switching to Thread 0xb7fecb70 (LWP 29843)]
+
+Breakpoint 1, MyTask::svc (this=0xbffff680) at server1.cpp:92
+92      {
+(gdb) b ACE_Select_Reactor_Notify::dispatch_notify(ACE_Notification_Buffer&) 
+Breakpoint 2 at 0x1fa96d: file ../../ace/Select_Reactor_Base.cpp, line 825.
+(gdb) c
+Continuing.
+(3086928752) enter MyTask::svc()
+
+(3086928752) in Handler()
+
+(3086928752) handle_events(10) timeout, result = 0
+
+
+Breakpoint 2, ACE_Select_Reactor_Notify::dispatch_notify (this=0x8059420, buffer=...) at ../../ace/Select_Reactor_Base.cpp:825
+825       if (buffer.eh_ != 0)
+(gdb) p buffer 
+$1 = (ACE_Notification_Buffer &) @0xb7fec078: {eh_ = 0x0, mask_ = 4}
+(gdb) bt
+#0  ACE_Select_Reactor_Notify::dispatch_notify (this=0x8059420, buffer=...) at ../../ace/Select_Reactor_Base.cpp:825
+#1  0x001fa69b in ACE_Select_Reactor_Notify::handle_input (this=0x8059420, handle=6) at ../../ace/Select_Reactor_Base.cpp:923
+#2  0x001fb819 in ACE_Select_Reactor_Notify::dispatch_notifications (this=0x8059420, number_of_active_handles=@0xb7fec164, rd_mask=...)
+    at ../../ace/Select_Reactor_Base.cpp:746
+#3  0x00182ade in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch_notification_handlers (this=0x8058ae8, dispatch_set=..., 
+    number_of_active_handles=@0xb7fec164, number_of_handlers_dispatched=@0xb7fec138) at ../../ace/Select_Reactor_T.cpp:1162
+#4  0x00183c87 in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch (this=0x8058ae8, active_handle_count=0, dispatch_set=...)
+    at ../../ace/Select_Reactor_T.cpp:1353
+#5  0x00186828 in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events_i (this=0x8058ae8, max_wait_time=0xb7fec234)
+    at ../../ace/Select_Reactor_T.cpp:1442
+#6  ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events (this=0x8058ae8, max_wait_time=0xb7fec234)
+    at ../../ace/Select_Reactor_T.cpp:1419
+#7  0x00182448 in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events (this=0x8058ae8, max_wait_time=...)
+    at ../../ace/Select_Reactor_T.cpp:759
+#8  0x0804cc0c in ACE_Reactor::handle_events (this=0x8056930, max_wait_time=...) at /usr/local/include/ace/Reactor.inl:200
+#9  0x0804ba52 in MyTask::svc (this=0xbffff680) at server1.cpp:106
+#10 0x00213b52 in ACE_Task_Base::svc_run (args=0xbffff680) at ../../ace/Task.cpp:275
+#11 0x00214eed in ACE_Thread_Adapter::invoke_i (this=0x8056930) at ../../ace/Thread_Adapter.cpp:149
+#12 0x00214f65 in ACE_Thread_Adapter::invoke (this=0x8056930) at ../../ace/Thread_Adapter.cpp:98
+#13 0x0018b5c1 in ace_thread_adapter (args=0x8056930) at ../../ace/Base_Thread_Adapter.cpp:124
+#14 0x0036b80e in start_thread () from /lib/tls/i686/cmov/libpthread.so.0
+#15 0x005d57ee in clone () from /lib/tls/i686/cmov/libc.so.6
+(gdb) n
+869     }
+(gdb) 
+
+
+由ACE_Reactor的wakeup_all_threads在Linux上的实现可知，调用
+ACE_Reactor::instance()->wakeup_all_threads();
+和调用ACE_Reactor::instance()->notify();效果相同。
+
+template <class ACE_SELECT_REACTOR_TOKEN> int
+ACE_Select_Reactor_T<ACE_SELECT_REACTOR_TOKEN>::notify (ACE_Event_Handler *eh,
+                                                        ACE_Reactor_Mask mask,
+                                                        ACE_Time_Value *timeout)
+{
+  ACE_TRACE ("ACE_Select_Reactor_T::notify");
+
+  // Pass over both the Event_Handler *and* the mask to allow the
+  // caller to dictate which Event_Handler method the receiver
+  // invokes.  Note that this call can timeout.
+
+  ssize_t const n = this->notify_handler_->notify (eh, mask, timeout);
+  return n == -1 ? -1 : 0;
+}
+
+
+2. 调用自定义的handler的notify方法分析
+
+调用方法：handler.notify();
+会按照调用notify时指定的mask调用相应的自定义的handle_*方法，例如，传递给notify用的ACE_Event_Handler::READ_MASK，则会调用我们自定义的handle_input，若mask为ACE_Event_Handler::EXCEPT_MASK，则会调用我们自定义的handle_except。
+对于本例，应该在handle_input中判断参数是否为ACE_INVALID_HANDLE，如果是，则应该直接返回。
+
+handle_events call stack
+
+->ACE_Reactor::handle_events
+ ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events(ACE_Time_Value &max_wait_time)
+  ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events(ACE_Time_Value *max_wait_time)
+   ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events_i
+    ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch
+     ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch_notification
+      ->ACE_Select_Reactor_Notify::dispatch_notifications
+       ->ACE_Select_Reactor_Notify::handle_input
+        ->ACE_Select_Reactor_Notify::dispatch_notify
+         ->Handler::handle_input  //call user-defined handle_input
+
+
+# g++ -g -o server1 server1.cpp -lACE -lpthread
+# gdb ./server1
+GNU gdb (GDB) 7.0-ubuntu
+Copyright (C) 2009 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "i486-linux-gnu".
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>...
+Reading symbols from /mnt/hgfs/programming/win32/Server/server1...done.
+(gdb) b MyTask::svc() 
+Breakpoint 1 at 0x804b914: file server1.cpp, line 92.
+(gdb) r
+Starting program: /mnt/hgfs/programming/win32/Server/server1 
+[Thread debugging using libthread_db enabled]
+---------------------------------------------
+input command to test the program
+ s or S : start the talker (ACE Task)
+ q or Q : quit
+---------------------------------------------
+$ input command >s
+(3086931664) main::start
+(3086931664) MyTask start
+[New Thread 0xb7fecb70 (LWP 29901)]
+[Switching to Thread 0xb7fecb70 (LWP 29901)]
+
+Breakpoint 1, MyTask::svc (this=0xbffff680) at server1.cpp:92
+92      {
+(gdb) b Handler::handle_input(int) 
+Breakpoint 2 at 0x804c38b: file server1.cpp, line 168.
+(gdb) c
+Continuing.
+(3086928752) enter MyTask::svc()
+
+(3086928752) in Handler()
+
+(3086928752) handle_events(10) timeout, result = 0
+
+
+Breakpoint 2, Handler::handle_input (this=0xb7fec274, h=-1) at server1.cpp:168
+168     {
+(gdb) bt
+#0  Handler::handle_input (this=0xb7fec274, h=-1) at server1.cpp:168
+#1  0x00453a98 in ACE_Select_Reactor_Notify::dispatch_notify (this=0x8059420, buffer=...) at ../../ace/Select_Reactor_Base.cpp:837
+#2  0x0045369b in ACE_Select_Reactor_Notify::handle_input (this=0x8059420, handle=6) at ../../ace/Select_Reactor_Base.cpp:923
+#3  0x00454819 in ACE_Select_Reactor_Notify::dispatch_notifications (this=0x8059420, number_of_active_handles=@0xb7fec164, rd_mask=...)
+    at ../../ace/Select_Reactor_Base.cpp:746
+#4  0x003dbade in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch_notification_handlers (this=0x8058ae8, dispatch_set=..., 
+    number_of_active_handles=@0xb7fec164, number_of_handlers_dispatched=@0xb7fec138) at ../../ace/Select_Reactor_T.cpp:1162
+#5  0x003dcc87 in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch (this=0x8058ae8, active_handle_count=0, dispatch_set=...)
+    at ../../ace/Select_Reactor_T.cpp:1353
+#6  0x003df828 in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events_i (this=0x8058ae8, max_wait_time=0xb7fec234)
+    at ../../ace/Select_Reactor_T.cpp:1442
+#7  ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events (this=0x8058ae8, max_wait_time=0xb7fec234)
+    at ../../ace/Select_Reactor_T.cpp:1419
+#8  0x003db448 in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events (this=0x8058ae8, max_wait_time=...)
+    at ../../ace/Select_Reactor_T.cpp:759
+#9  0x0804cbfa in ACE_Reactor::handle_events (this=0x8056930, max_wait_time=...) at /usr/local/include/ace/Reactor.inl:200
+#10 0x0804ba52 in MyTask::svc (this=0xbffff680) at server1.cpp:106
+#11 0x0046cb52 in ACE_Task_Base::svc_run (args=0xbffff680) at ../../ace/Task.cpp:275
+#12 0x0046deed in ACE_Thread_Adapter::invoke_i (this=0x8056930) at ../../ace/Thread_Adapter.cpp:149
+#13 0x0046df65 in ACE_Thread_Adapter::invoke (this=0x8056930) at ../../ace/Thread_Adapter.cpp:98
+#14 0x003e45c1 in ace_thread_adapter (args=0x8056930) at ../../ace/Base_Thread_Adapter.cpp:124
+#15 0x0077f80e in start_thread () from /lib/tls/i686/cmov/libpthread.so.0
+#16 0x002027ee in clone () from /lib/tls/i686/cmov/libc.so.6
+(gdb) n
+169         if (h == ACE_INVALID_HANDLE)
+(gdb) 
+171             ACE_DEBUG((LM_INFO, ACE_TEXT("(%t) handle_input: notification data\n")));
+(gdb) 
+(3086928752) handle_input: notification data
+172             return 0;
+(gdb) 
+191     }
+(gdb) 
+ACE_Select_Reactor_Notify::dispatch_notify (this=0x8059420, buffer=...) at ../../ace/Select_Reactor_Base.cpp:838
+838               break;
+(gdb) p buffer 
+$1 = (ACE_Notification_Buffer &) @0xb7fec078: {eh_ = 0xb7fec274, mask_ = 1}
+
+
+3. ACE_Reactor::notify定义
+
+    // = Notification methods.
+  
+    /**
+     * Dispatch user specified events.
+     *
+     * Handler will be dispatched irrespective of whether it is
+     * registered, not registered, or suspended in the Reactor.
+     *
+     * If user specified event is successfully queued,
+     * ACE_Event_Handler::add_reference() will be called.  After the
+     * notify occurs and the upcall to the handler completes, the
+     * handler will be implicitly removed from the Reactor and
+     * ACE_Event_Handler::remove_reference() will be called.  No other
+     * upcall reference counting is done.
+     *
+     * For I/O or OS events, the upcall is invoked with an
+     * ACE_INVALID_HANDLE.
+     *
+     * For timer events, the upcall is invoked with a null ACT.
+     *
+     * @param event_handler: IN - Handler on which the event will be
+     * dispatched.
+     * @param masks: IN - Events to be dispatched - multiple events can
+     * be OR'd together.
+     * @param timeout: INOUT - Relative time up to which to wait for
+     * user specified event to be queued.  If tv is 0, wait
+     * indefinitely.  When the call returns, tv has the time remaining
+     * after the call completes.
+     */
+    int notify (ACE_Event_Handler *event_handler = 0,
+                ACE_Reactor_Mask masks = ACE_Event_Handler::EXCEPT_MASK,
+                ACE_Time_Value *timeout = 0);
+
+    其参数缺省值中，event_handler为0。
+
+
+4. ACE_Select_Reactor_Notify::dispatch_notify定义
+
+int
+ACE_Select_Reactor_Notify::dispatch_notify (ACE_Notification_Buffer &buffer)
+{
+  int result = 0;
+
+#if defined (ACE_HAS_REACTOR_NOTIFICATION_QUEUE)
+  // Dispatch one message from the notify queue, and put another in
+  // the pipe if one is available.  Remember, the idea is to keep
+  // exactly one message in the pipe at a time.
+
+  bool more_messages_queued = false;
+  ACE_Notification_Buffer next;
+
+  result = notification_queue_.pop_next_notification(buffer,
+                                                     more_messages_queued,
+                                                     next);
+
+  if (result == 0)
+    {
+      return 0;
+    }
+
+  if (result == -1)
+    {
+      return -1;
+    }
+
+  if(more_messages_queued)
+    {
+      (void) ACE::send(this->notification_pipe_.write_handle(),
+            (char *)&next, sizeof(ACE_Notification_Buffer));
+    }
+#endif /* ACE_HAS_REACTOR_NOTIFICATION_QUEUE */
+
+  // If eh == 0 then another thread is unblocking the
+  // <ACE_Select_Reactor> to update the <ACE_Select_Reactor>'s
+  // internal structures.  Otherwise, we need to dispatch the
+  // appropriate handle_* method on the <ACE_Event_Handler> pointer
+  // we've been passed.
+  if (buffer.eh_ != 0)
+    {
+      ACE_Event_Handler *event_handler = buffer.eh_;
+
+      bool const requires_reference_counting =
+        event_handler->reference_counting_policy ().value () ==
+        ACE_Event_Handler::Reference_Counting_Policy::ENABLED;
+
+      switch (buffer.mask_)
+        {
+        case ACE_Event_Handler::READ_MASK:
+        case ACE_Event_Handler::ACCEPT_MASK:
+          result = event_handler->handle_input (ACE_INVALID_HANDLE);
+          break;
+        case ACE_Event_Handler::WRITE_MASK:
+          result = event_handler->handle_output (ACE_INVALID_HANDLE);
+          break;
+        case ACE_Event_Handler::EXCEPT_MASK:
+          result = event_handler->handle_exception (ACE_INVALID_HANDLE);
+          break;
+        case ACE_Event_Handler::QOS_MASK:
+          result = event_handler->handle_qos (ACE_INVALID_HANDLE);
+          break;
+        case ACE_Event_Handler::GROUP_QOS_MASK:
+          result = event_handler->handle_group_qos (ACE_INVALID_HANDLE);
+          break;
+        default:
+          // Should we bail out if we get an invalid mask?
+          ACE_ERROR ((LM_ERROR,
+                      ACE_TEXT ("invalid mask = %d\n"),
+                      buffer.mask_));
+        }
+
+      if (result == -1)
+        event_handler->handle_close (ACE_INVALID_HANDLE,
+                                     ACE_Event_Handler::EXCEPT_MASK);
+
+      if (requires_reference_counting)
+        {
+          event_handler->remove_reference ();
+        }
+    }
+
+  return 1;
+}

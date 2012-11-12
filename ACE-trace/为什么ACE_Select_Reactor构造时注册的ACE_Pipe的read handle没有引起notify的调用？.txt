@@ -1,0 +1,564 @@
+为什么ACE_Select_Reactor构造时注册的ACE_Pipe的read handle没有引起notify的调用？
+
+ACE_Select_Reactor在构造时会注册ACE_Pipe notification_pipe_的read handle，但此次的register_handler为什么没有引起notify的调用？
+
+ACE_Thread::self ()和ACE_Token::owner_相同，也不会调用notify。
+
+1. ACE_Select_Reactor的构造
+
+    //initialization
+    selector = new ACE_Select_Reactor;
+
+2. 构造过程日志分析
+
+(3077507952) calling ACE_Select_Reactor_T::ACE_Select_Reactor_T in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 484
+   (3077507952) calling ACE_Select_Reactor_T::open in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 376
+      (3077507952) calling ACE_Timer_Queue_T::ACE_Timer_Queue_T in file `/usr/local/include/ace/Timer_Queue_T.cpp' on line 175
+      (3077507952) leaving ACE_Timer_Queue_T::ACE_Timer_Queue_T
+      (3077507952) calling ACE_Timer_Heap_T::ACE_Timer_Heap_T in file `/usr/local/include/ace/Timer_Heap_T.cpp' on line 178
+         (3077507952) calling ACE_Timer_Heap_Iterator_T::ACE_Timer_Heap_Iterator in file `/usr/local/include/ace/Timer_Heap_T.cpp' on line 47
+         (3077507952) leaving ACE_Timer_Heap_Iterator_T::ACE_Timer_Heap_Iterator
+      (3077507952) leaving ACE_Timer_Heap_T::ACE_Timer_Heap_T
+      (3077507952) calling ACE_Select_Reactor_T::register_handler in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 285
+         (3077507952) calling ACE_Select_Reactor_T::register_handler_i in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 992
+            (3077507952) calling ACE_Select_Reactor_T::is_suspended_i in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 974
+               (3077507952) calling ACE_Select_Reactor_Handler_Repository::find in file `/usr/local/include/ace/Select_Reactor_Base.inl' on line 46
+               (3077507952) leaving ACE_Select_Reactor_Handler_Repository::find
+               (3077507952) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+               (3077507952) leaving ACE_Handle_Set::is_set
+               (3077507952) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+               (3077507952) leaving ACE_Handle_Set::is_set
+               (3077507952) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+               (3077507952) leaving ACE_Handle_Set::is_set
+            (3077507952) leaving ACE_Select_Reactor_T::is_suspended_i
+            (3077507952) calling ACE_Handle_Set::set_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 101
+               (3077507952) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+               (3077507952) leaving ACE_Handle_Set::is_set
+            (3077507952) leaving ACE_Handle_Set::set_bit
+         (3077507952) leaving ACE_Select_Reactor_T::register_handler_i
+      (3077507952) leaving ACE_Select_Reactor_T::register_handler
+   (3077507952) leaving ACE_Select_Reactor_T::open
+(3077507952) leaving ACE_Select_Reactor_T::ACE_Select_Reactor_T
+	
+3. 分析问题
+
+root@yu29:/mnt/hgfs/programming/win32/Server# gdb ./server81
+GNU gdb (GDB) 7.0-ubuntu
+Copyright (C) 2009 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "i486-linux-gnu".
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>...
+Reading symbols from /mnt/hgfs/programming/win32/Server/server81...done.
+(gdb) b MyTask::svc() 
+Breakpoint 1 at 0x8053345: file server81.cpp, line 125.
+(gdb) r
+Starting program: /mnt/hgfs/programming/win32/Server/server81 
+[Thread debugging using libthread_db enabled]
+---------------------------------------------
+input command to test the program
+ s or S : start the talker (ACE Task)
+ q or Q : quit
+---------------------------------------------
+$ input command >s
+(3086931664) main::start
+(3086931664) MyTask start
+[New Thread 0xb7fecb70 (LWP 3820)]
+[Switching to Thread 0xb7fecb70 (LWP 3820)]
+
+Breakpoint 1, MyTask::svc (this=0x806a774) at server81.cpp:125
+125     {
+(gdb) l
+120
+121         return 0;
+122     }
+123
+124     int MyTask::svc()
+125     {
+126         ACE_DEBUG ((LM_INFO, ACE_TEXT ("(%t) enter MyTask::svc()\n\n")));
+127
+128         //initialization
+129         selector = new ACE_Select_Reactor;
+(gdb) b server81.cpp:129
+Breakpoint 2 at 0x80533a5: file server81.cpp, line 129.
+(gdb) c
+Continuing.
+(3086928752) enter MyTask::svc()
+
+
+Breakpoint 2, MyTask::svc (this=0x806a774) at server81.cpp:129
+129         selector = new ACE_Select_Reactor;
+(gdb) b ACE_Token::shared_acquire(void (*)(void*), void*, ACE_Time_Value*, ACE_Token::ACE_Token_Op_Type) 
+Breakpoint 3 at 0x21daca: file ../../ace/Token.cpp, line 188.
+(gdb) b Token.cpp:199
+Breakpoint 4 at 0x21db01: file ../../ace/Token.cpp, line 199.
+(gdb) b Token.cpp:212
+Breakpoint 5 at 0x21db0f: file ../../ace/Token.cpp, line 212.
+(gdb) c
+Continuing.
+
+Breakpoint 3, ACE_Token::shared_acquire (this=0x806d278, sleep_hook_func=0, arg=0x0, timeout=0x0, op_type=ACE_Token::WRITE_TOKEN)
+    at ../../ace/Token.cpp:188
+188     {
+(gdb) bt
+#0  ACE_Token::shared_acquire (this=0x806d278, sleep_hook_func=0, arg=0x0, timeout=0x0, op_type=ACE_Token::WRITE_TOKEN)
+    at ../../ace/Token.cpp:188
+#1  0x0021ddec in ACE_Token::acquire (this=0x806d278, timeout=0x0) at ../../ace/Token.cpp:339
+#2  0x08057125 in ACE_Guard<ACE_Reactor_Token_T<ACE_Token> >::acquire (this=0xb7fec17c) at /usr/local/include/ace/Guard_T.inl:12
+#3  0x08056a55 in ACE_Guard (this=0xb7fec17c, l=...) at /usr/local/include/ace/Guard_T.inl:38
+#4  0x080564a6 in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::open (this=0x806cba8, size=1024, restart=0, sh=0x0, tq=0x0, 
+    disable_notify_pipe=0, notify=0x0) at /usr/local/include/ace/Select_Reactor_T.cpp:377
+#5  0x08055d37 in ACE_Select_Reactor_T (this=0x806cba8, sh=0x0, tq=0x0, disable_notify_pipe=0, notify=0x0, mask_signals=1, s_queue=-1)
+    at /usr/local/include/ace/Select_Reactor_T.cpp:488
+#6  0x080533ed in MyTask::svc (this=0x806a774) at server81.cpp:129
+#7  0x00213b52 in ACE_Task_Base::svc_run (args=0x806a774) at ../../ace/Task.cpp:275
+#8  0x00214eed in ACE_Thread_Adapter::invoke_i (this=0x806a9f0) at ../../ace/Thread_Adapter.cpp:149
+#9  0x00214f65 in ACE_Thread_Adapter::invoke (this=0x806a9f0) at ../../ace/Thread_Adapter.cpp:98
+#10 0x0018b5c1 in ace_thread_adapter (args=0x806a9f0) at ../../ace/Base_Thread_Adapter.cpp:124
+#11 0x00b9f80e in start_thread () from /lib/tls/i686/cmov/libpthread.so.0
+#12 0x005af7ee in clone () from /lib/tls/i686/cmov/libc.so.6
+(gdb) c
+Continuing.
+
+Breakpoint 4, ACE_Token::shared_acquire (this=0x806d278, sleep_hook_func=0, arg=0x0, timeout=0x0, op_type=ACE_Token::WRITE_TOKEN)
+    at ../../ace/Token.cpp:199
+199       if (!this->in_use_)
+(gdb) l
+194     #endif /* ACE_TOKEN_DEBUGGING */
+195
+196       ACE_thread_t const thr_id = ACE_Thread::self ();
+197
+198       // Nobody holds the token.
+199       if (!this->in_use_)
+200         {
+201           // Its mine!
+202           this->in_use_ = op_type;
+203           this->owner_ = thr_id;
+(gdb) 
+204           return 0;
+205         }
+206
+207       //
+208       // Someone already holds the token.
+209       //
+210
+211       // Check if it is us.
+212       if (ACE_OS::thr_equal (thr_id, this->owner_))
+213         {
+(gdb) p *this
+$1 = {_vptr.ACE_Token = 0x805ffe0, writers_ = {head_ = 0x0, tail_ = 0x0}, readers_ = {head_ = 0x0, tail_ = 0x0}, lock_ = {lock_ = {
+      __data = {__lock = 1, __count = 0, __owner = 3820, __kind = 0, __nusers = 1, {__spins = 0, __list = {__next = 0x0}}}, 
+      __size = "\001\000\000\000\000\000\000\000\354\016\000\000\000\000\000\000\001\000\000\000\000\000\000", __align = 1}, 
+    removed_ = false}, owner_ = 0, in_use_ = 0, waiters_ = 0, nesting_level_ = 0, attributes_ = {attributes_ = {__size = "\000\000\000", 
+      __align = 0}}, queueing_strategy_ = -1}
+(gdb) p this->in_use_ 
+$2 = 0
+(gdb) c
+Continuing.
+
+Breakpoint 3, ACE_Token::shared_acquire (this=0x806d278, sleep_hook_func=0, arg=0x0, timeout=0x0, op_type=ACE_Token::WRITE_TOKEN)
+    at ../../ace/Token.cpp:188
+188     {
+(gdb) bt
+#0  ACE_Token::shared_acquire (this=0x806d278, sleep_hook_func=0, arg=0x0, timeout=0x0, op_type=ACE_Token::WRITE_TOKEN)
+    at ../../ace/Token.cpp:188
+#1  0x0021ddec in ACE_Token::acquire (this=0x806d278, timeout=0x0) at ../../ace/Token.cpp:339
+#2  0x08057125 in ACE_Guard<ACE_Reactor_Token_T<ACE_Token> >::acquire (this=0xb7fec118) at /usr/local/include/ace/Guard_T.inl:12
+#3  0x08056a55 in ACE_Guard (this=0xb7fec118, l=...) at /usr/local/include/ace/Guard_T.inl:38
+#4  0x0805a441 in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::register_handler (this=0x806cba8, handle=5, handler=0x806d4c8, 
+    mask=1) at /usr/local/include/ace/Select_Reactor_T.cpp:286
+#5  0x001fad25 in ACE_Select_Reactor_Notify::open (this=0x806d4c8, r=0x806cba8, disable_notify_pipe=0)
+    at ../../ace/Select_Reactor_Base.cpp:639
+#6  0x08056747 in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::open (this=0x806cba8, size=1024, restart=0, sh=0x0, tq=0x0, 
+    disable_notify_pipe=0, notify=0x0) at /usr/local/include/ace/Select_Reactor_T.cpp:423
+#7  0x08055d37 in ACE_Select_Reactor_T (this=0x806cba8, sh=0x0, tq=0x0, disable_notify_pipe=0, notify=0x0, mask_signals=1, s_queue=-1)
+    at /usr/local/include/ace/Select_Reactor_T.cpp:488
+#8  0x080533ed in MyTask::svc (this=0x806a774) at server81.cpp:129
+#9  0x00213b52 in ACE_Task_Base::svc_run (args=0x806a774) at ../../ace/Task.cpp:275
+#10 0x00214eed in ACE_Thread_Adapter::invoke_i (this=0x806a9f0) at ../../ace/Thread_Adapter.cpp:149
+#11 0x00214f65 in ACE_Thread_Adapter::invoke (this=0x806a9f0) at ../../ace/Thread_Adapter.cpp:98
+#12 0x0018b5c1 in ace_thread_adapter (args=0x806a9f0) at ../../ace/Base_Thread_Adapter.cpp:124
+#13 0x00b9f80e in start_thread () from /lib/tls/i686/cmov/libpthread.so.0
+#14 0x005af7ee in clone () from /lib/tls/i686/cmov/libc.so.6
+(gdb) c
+Continuing.
+
+Breakpoint 4, ACE_Token::shared_acquire (this=0x806d278, sleep_hook_func=0, arg=0x0, timeout=0x0, op_type=ACE_Token::WRITE_TOKEN)
+    at ../../ace/Token.cpp:199
+199       if (!this->in_use_)
+(gdb) c
+Continuing.
+
+Breakpoint 5, ACE_Token::shared_acquire (this=0x806d278, sleep_hook_func=0, arg=0x0, timeout=0x0, op_type=ACE_Token::WRITE_TOKEN)
+    at ../../ace/Token.cpp:212
+212       if (ACE_OS::thr_equal (thr_id, this->owner_))
+(gdb) p *this
+$3 = {_vptr.ACE_Token = 0x805ffe0, writers_ = {head_ = 0x0, tail_ = 0x0}, readers_ = {head_ = 0x0, tail_ = 0x0}, lock_ = {lock_ = {
+      __data = {__lock = 1, __count = 0, __owner = 3820, __kind = 0, __nusers = 1, {__spins = 0, __list = {__next = 0x0}}}, 
+      __size = "\001\000\000\000\000\000\000\000\354\016\000\000\000\000\000\000\001\000\000\000\000\000\000", __align = 1}, 
+    removed_ = false}, owner_ = 3086928752, in_use_ = 2, waiters_ = 0, nesting_level_ = 0, attributes_ = {attributes_ = {
+      __size = "\000\000\000", __align = 0}}, queueing_strategy_ = -1}
+(gdb) p this->owner_ 
+$4 = 3086928752
+(gdb) p thr_id 
+$5 = 3086928752
+(gdb) n
+214           ++this->nesting_level_;
+(gdb) 
+323       return ret;
+(gdb) info breakpoints 
+Num     Type           Disp Enb Address    What
+1       breakpoint     keep y   0x08053345 in MyTask::svc() at server81.cpp:125
+        breakpoint already hit 1 time
+2       breakpoint     keep y   0x080533a5 in MyTask::svc() at server81.cpp:129
+        breakpoint already hit 1 time
+3       breakpoint     keep y   0x0021daca in ACE_Token::shared_acquire(void (*)(void*), void*, ACE_Time_Value*, ACE_Token::ACE_Token_Op_Type) at ../../ace/Token.cpp:188
+        breakpoint already hit 2 times
+4       breakpoint     keep y   0x0021db01 in ACE_Token::shared_acquire(void (*)(void*), void*, ACE_Time_Value*, ACE_Token::ACE_Token_Op_Type) at ../../ace/Token.cpp:199
+        breakpoint already hit 2 times
+5       breakpoint     keep y   0x0021db0f in ACE_Token::shared_acquire(void (*)(void*), void*, ACE_Time_Value*, ACE_Token::ACE_Token_Op_Type) at ../../ace/Token.cpp:212
+        breakpoint already hit 1 time
+(gdb) delete breakpoints 3
+(gdb) delete breakpoints 4
+(gdb) delete breakpoints 5
+(gdb) c
+Continuing.
+(3086928752) in Handler()
+
+(3086928752) MyTask2 start
+[New Thread 0xb77ebb70 (LWP 3839)]
+(3078536048) enter MyTask2::svc()
+
+(3078536048) MyTask2::svc() register ACE_STDIN handler
+(3086928752) handle_events() succeed, result = 1
+
+(3078536048) MyTask2::svc() remove ACE_STDIN handler
+
+(3086928752) handle_events() succeed, result = 1
+
+(3078536048) MyTask2::svc() register ACE_STDIN handler
+(3086928752) handle_events() succeed, result = 1
+
+(3078536048) MyTask2::svc() remove ACE_STDIN handler
+
+(3086928752) handle_events() succeed, result = 1
+
+(3078536048) exit MyTask2::svc()
+
+[Thread 0xb77ebb70 (LWP 3839) exited]
+recv: No. = 1, host = localhost, IP = 7f000001, port = 35159, bytes = 21
+      data = a ACE_SOCK_Dgram test
+(3086928752) handle_events() succeed, result = 1
+
+recv: No. = 2, host = localhost, IP = 7f000001, port = 34267, bytes = 21
+      data = a ACE_SOCK_Dgram test
+(3086928752) handle_events() succeed, result = 1
+
+(3086928752) exit MyTask::svc()
+
+(3086928752) in ~Handler()
+
+[Thread 0xb7fecb70 (LWP 3820) exited]
+(3086931664) main::end
+
+$ input command >q
+
+Program exited normally.
+(gdb) q
+root@yu29:/mnt/hgfs/programming/win32/Server# 
+
+4. ACE_Select_Reactor的构造
+
+//file: ace/Select_Reactor_T.cpp
+
+  /// If @a disable_notify_pipe is non-0 then the reactor will
+  /// not create a notification pipe, which will save two I/O handles
+  /// but will elide the <notify()> feature.  If @a mask_signals is
+  /// 1 the reactor is "signal-safe" when dispatching handlers to
+  /// signal events, whereas if @a mask_signals is 0 the reactor will
+  /// be more efficient, but not signal-safe (which may be perfectly
+  /// fine if your application doesn't use the reactor to handle signals).
+  ACE_Select_Reactor_T (ACE_Sig_Handler * = 0,
+                        ACE_Timer_Queue * = 0,
+                        int disable_notify_pipe = ACE_DISABLE_NOTIFY_PIPE_DEFAULT,
+                        ACE_Reactor_Notify *notify = 0,
+                        int mask_signals = 1,
+                        int s_queue = ACE_SELECT_TOKEN::FIFO);
+
+
+template <class ACE_SELECT_REACTOR_TOKEN>
+ACE_Select_Reactor_T<ACE_SELECT_REACTOR_TOKEN>::ACE_Select_Reactor_T
+  (ACE_Sig_Handler *sh,
+   ACE_Timer_Queue *tq,
+   int disable_notify_pipe,
+   ACE_Reactor_Notify *notify,
+   int mask_signals,
+   int s_queue)
+    : ACE_Select_Reactor_Impl (mask_signals)
+    , token_ (s_queue)
+    , lock_adapter_ (token_)
+    , deactivated_ (0)
+{
+  ACE_TRACE ("ACE_Select_Reactor_T::ACE_Select_Reactor_T");
+
+  this->token_.reactor (*this);
+  // First try to open the Reactor with the hard-coded default.
+  if (this->open (ACE_Select_Reactor_T<ACE_SELECT_REACTOR_TOKEN>::DEFAULT_SIZE,
+                  0,
+                  sh,
+                  tq,
+                  disable_notify_pipe,
+                  notify) == -1)
+    {
+      // The hard-coded default Reactor size failed, so attempt to
+      // determine the size at run-time by checking the process file
+      // descriptor limit on platforms that support this feature.
+
+      // There is no need to deallocate resources from previous open()
+      // call since the open() method deallocates any resources prior
+      // to exiting if an error was encountered.
+
+      // Set the default reactor size to be the current limit on the
+      // number of file descriptors available to the process.  This
+      // size is not necessarily the maximum limit.
+      if (this->open (ACE::max_handles (),
+                     0,
+                     sh,
+                     tq,
+                     disable_notify_pipe,
+                     notify) == -1)
+        ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT ("%p\n"),
+                    ACE_TEXT ("ACE_Select_Reactor_T::open ")
+                    ACE_TEXT ("failed inside ")
+                    ACE_TEXT ("ACE_Select_Reactor_T::CTOR")));
+    }
+}
+
+
+template <class ACE_SELECT_REACTOR_TOKEN> int
+ACE_Select_Reactor_T<ACE_SELECT_REACTOR_TOKEN>::open
+  (size_t size,
+   int restart,
+   ACE_Sig_Handler *sh,
+   ACE_Timer_Queue *tq,
+   int disable_notify_pipe,
+   ACE_Reactor_Notify *notify)
+{
+  ACE_TRACE ("ACE_Select_Reactor_T::open");
+  ACE_MT (ACE_GUARD_RETURN (ACE_SELECT_REACTOR_TOKEN, ace_mon, this->token_, -1));
+
+  // Can't initialize ourselves more than once.
+  if (this->initialized_)
+    return -1;
+
+  this->owner_ = ACE_Thread::self ();
+  this->restart_ = restart;
+  this->signal_handler_ = sh;
+  this->timer_queue_ = tq;
+  this->notify_handler_ = notify;
+
+  int result = 0;
+
+  // Allows the signal handler to be overridden.
+  if (this->signal_handler_ == 0)
+    {
+      ACE_NEW_RETURN (this->signal_handler_,
+                      ACE_Sig_Handler,
+                      -1);
+
+      this->delete_signal_handler_ = true;
+    }
+
+  // Allows the timer queue to be overridden.
+  if (result != -1 && this->timer_queue_ == 0)
+    {
+      ACE_NEW_RETURN (this->timer_queue_,
+                      ACE_Timer_Heap,
+                      -1);
+
+      this->delete_timer_queue_ = true;
+    }
+
+  // Allows the Notify_Handler to be overridden.
+  if (result != -1 && this->notify_handler_ == 0)
+    {
+      ACE_NEW_RETURN (this->notify_handler_,
+                      ACE_Select_Reactor_Notify,
+                      -1);
+
+      this->delete_notify_handler_ = true;
+    }
+
+  if (result != -1 && this->handler_rep_.open (size) == -1)
+    result = -1;
+  else if (this->notify_handler_->open (this,
+                                        0,
+                                        disable_notify_pipe) == -1)
+    {
+      ACE_ERROR ((LM_ERROR,
+                  ACE_TEXT ("%p\n"),
+                  ACE_TEXT ("notification pipe open failed")));
+      result = -1;
+    }
+
+  if (result != -1)
+    // We're all set to go.
+    this->initialized_ = true;
+  else
+    // This will close down all the allocated resources properly.
+    this->close ();
+
+  return result;
+}
+
+
+5. ACE_Token::shared_acquire
+
+//file: ace/Token.cpp
+
+int
+ACE_Token::shared_acquire (void (*sleep_hook_func)(void *),
+                           void *arg,
+                           ACE_Time_Value *timeout,
+                           ACE_Token_Op_Type op_type)
+{
+  ACE_TRACE ("ACE_Token::shared_acquire");
+  ACE_GUARD_RETURN (ACE_Thread_Mutex, ace_mon, this->lock_, -1);
+
+#if defined (ACE_TOKEN_DEBUGGING)
+  this->dump ();
+#endif /* ACE_TOKEN_DEBUGGING */
+
+  ACE_thread_t const thr_id = ACE_Thread::self ();
+
+  // Nobody holds the token.
+  if (!this->in_use_)
+    {
+      // Its mine!
+      this->in_use_ = op_type;
+      this->owner_ = thr_id;
+      return 0;
+    }
+
+  //
+  // Someone already holds the token.
+  //
+
+  // Check if it is us.
+  if (ACE_OS::thr_equal (thr_id, this->owner_))
+    {
+      ++this->nesting_level_;
+      return 0;
+    }
+
+  // Do a quick check for "polling" behavior.
+  if (timeout != 0 && timeout->sec () == 0 && timeout->usec () == 0)
+    {
+      errno = ETIME;
+      return -1;
+    }
+
+  //
+  // We've got to sleep until we get the token.
+  //
+
+  // Which queue we should end up in...
+  ACE_Token_Queue *queue = (op_type == ACE_Token::READ_TOKEN
+                            ? &this->readers_
+                            : &this->writers_);
+
+  // Allocate queue entry on stack.  This works since we don't exit
+  // this method's activation record until we've got the token.
+  ACE_Token::ACE_Token_Queue_Entry my_entry (this->lock_,
+                                             thr_id,
+                                             this->attributes_);
+  queue->insert_entry (my_entry, this->queueing_strategy_);
+  ++this->waiters_;
+
+  // Execute appropriate <sleep_hook> callback.  (@@ should these
+  // methods return a success/failure status, and if so, what should
+  // we do with it?)
+  int ret = 0;
+  if (sleep_hook_func)
+    {
+      (*sleep_hook_func) (arg);
+      ++ret;
+    }
+  else
+    {
+      // Execute virtual method.
+      this->sleep_hook ();
+      ++ret;
+    }
+
+  bool timed_out = false;
+  bool error = false;
+
+  // Sleep until we've got the token (ignore signals).
+  do
+    {
+      int const result = my_entry.wait (timeout, this->lock_);
+
+      if (result == -1)
+        {
+          // Note, this should obey whatever thread-specific interrupt
+          // policy is currently in place...
+          if (errno == EINTR)
+            continue;
+
+#if defined (ACE_TOKEN_DEBUGGING)
+          cerr << '(' << ACE_Thread::self () << ')'
+               << " acquire: "
+               << (errno == ETIME ? "timed out" : "error occurred")
+               << endl;
+#endif /* ACE_TOKEN_DEBUGGING */
+
+          // We come here if a timeout occurs or some serious
+          // ACE_Condition object error.
+          if (errno == ETIME)
+            timed_out = true;
+          else
+            error = true;
+
+          // Stop the loop.
+          break;
+        }
+    }
+  while (!ACE_OS::thr_equal (thr_id, this->owner_));
+
+  // Do this always and irrespective of the result of wait().
+  --this->waiters_;
+  queue->remove_entry (&my_entry);
+
+#if defined (ACE_TOKEN_DEBUGGING)
+  ACE_DEBUG ((LM_DEBUG, "(%t) ACE_Token::shared_acquire (UNBLOCKED)\n"));
+#endif /* ACE_TOKEN_DEBUGGING */
+
+  // If timeout occured
+  if (timed_out)
+    {
+      // This thread was still selected to own the token.
+      if (my_entry.runable_)
+        {
+          // Wakeup next waiter since this thread timed out.
+          this->wakeup_next_waiter ();
+        }
+
+      // Return error.
+     return -1;
+    }
+  else if (error)
+    {
+      // Return error.
+      return -1;
+    }
+
+  // If this is a normal wakeup, this thread should be runnable.
+  ACE_ASSERT (my_entry.runable_);
+
+  return ret;
+}

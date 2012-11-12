@@ -1,0 +1,222 @@
+(gdb) p this
+$57 = (ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> > * const) 0x806cba8
+(gdb) p *this
+$58 = 
+{
+    <ACE_Select_Reactor_Impl> = 
+    {
+        <ACE_Reactor_Impl> = 
+        {
+            _vptr.ACE_Reactor_Impl = 0x805fcc8
+        }, 
+        
+        ...
+        
+        //ACE_Select_Reactor_Handle_Set dispatch_set_;
+        dispatch_set_ = 
+        {
+            //ACE_Handle_Set rd_mask;
+            rd_mask_ = 
+            {
+			    //Size of the set, i.e., a count of the number of enabled bits.
+				//int size_;
+                size_ = 2, 
+				
+				//Current max handle.
+				//ACE_HANDLE max_handle_;
+                max_handle_ = 7, 
+				
+				//#if defined (ACE_HAS_BIG_FD_SET)
+				//Current min handle.
+				//ACE_HANDLE min_handle_;
+				//#endif /* ACE_HAS_BIG_FD_SET */
+                min_handle_ = 5, 
+				
+				//Bitmask
+				//fd_set mask_;
+                mask_ = 
+                {
+                    fds_bits = {0 <repeats 32 times>}
+                }, 
+				
+				// Table that maps bytes to counts of the enabled bits in each value
+				// from 0 to 255.
+				//static const char nbits_[NBITS];
+                static nbits_ = "\000\001\001\002\001\002\002\003\001\002\002\003\002\003\003\004\001\002\002\..."...
+            }, 
+            
+            //ACE_Handle_Set wr_mask;
+            wr_mask_ = {size_ = 0, max_handle_ = -1, min_handle_ = 1024, mask_ = {fds_bits = {0 <repeats 32 times>}}, 
+                static nbits_ = "\000\001\001\002\001\002\002\003\001\002\002\003\002\003\003\004\001\002\002\..."...}, 
+            
+            //ACE_Handle_Set ex_mask
+            ex_mask_ = {size_ = 0, max_handle_ = -1, min_handle_ = 1024, mask_ = {fds_bits = {0 <repeats 32 times>}}, 
+                static nbits_ = "\000\001\001\002\001\002\002\003\001\002\002\003\002\003\003\004\001\002\002\..."...}
+        }, 
+        
+        ...
+    }
+    ...
+}
+
+
+1. ACE_Select_Reactor_Handle_Set definition
+
+//file: ace/Select_Reactor_Base.h
+
+/*
+ * Hook to specialize the Select_Reactor_Base implementation
+ * with the concrete reactor, e.g., select or tp reactor
+ * specified at build/compilation time.
+ */
+//@@ REACTOR_SPL_INCLUDE_FORWARD_DECL_ADD_HOOK
+
+/**
+ * @class ACE_Select_Reactor_Handle_Set
+ *
+ * @brief Track handles we are interested for various events.
+ */
+class ACE_Export ACE_Select_Reactor_Handle_Set
+{
+public:
+    /// Read events (e.g., input pending, accept pending).
+    ACE_Handle_Set rd_mask_;
+  
+    /// Write events (e.g., flow control abated, non-blocking connection
+    /// complete).
+    ACE_Handle_Set wr_mask_;
+  
+    /// Exception events (e.g., SIG_URG).
+    ACE_Handle_Set ex_mask_;
+};
+
+
+2. ACE_Handle_Set definition
+
+//file: ace/Handle_Set.h
+
+// Default size of the ACE Reactor.
+#if defined (FD_SETSIZE)
+   int const ACE_FD_SETSIZE = FD_SETSIZE;
+#else /* !FD_SETSIZE */
+#  define ACE_FD_SETSIZE FD_SETSIZE
+#endif /* ACE_FD_SETSIZE */
+
+#if !defined (ACE_DEFAULT_SELECT_REACTOR_SIZE)
+#  define ACE_DEFAULT_SELECT_REACTOR_SIZE ACE_FD_SETSIZE
+#endif /* ACE_DEFAULT_SELECT_REACTOR_SIZE */
+
+/**
+ * @class ACE_Handle_Set
+ *
+ * @brief C++ wrapper facade for the socket @c fd_set abstraction.
+ *
+ * This abstraction is a very efficient wrapper facade over
+ * @c fd_set.  In particular, no range checking is performed, so
+ * it's important not to set or clear bits that are outside the
+ * @c ACE_DEFAULT_SELECT_REACTOR_SIZE.
+ */
+class ACE_Export ACE_Handle_Set
+{
+public:
+    friend class ACE_Handle_Set_Iterator;
+  
+    // = Initialization and termination.
+  
+    enum
+    {
+      MAXSIZE = ACE_DEFAULT_SELECT_REACTOR_SIZE
+    };
+  
+    // = Initialization methods.
+    /// Constructor, initializes the bitmask to all 0s.
+    ACE_Handle_Set (void);
+  
+    //...
+  
+private:
+    /// Size of the set, i.e., a count of the number of enabled bits.
+    int size_;
+  
+    /// Current max handle.
+    ACE_HANDLE max_handle_;
+  
+  #if defined (ACE_HAS_BIG_FD_SET)
+    /// Current min handle.
+    ACE_HANDLE min_handle_;
+  #endif /* ACE_HAS_BIG_FD_SET */
+  
+    /// Bitmask.
+    fd_set mask_;
+  
+    enum
+    {
+      WORDSIZE = NFDBITS,
+  #if !defined (ACE_WIN32)
+      NUM_WORDS = howmany (MAXSIZE, NFDBITS),
+  #endif /* ACE_WIN32 */
+      NBITS = 256
+    };
+  
+    //...
+  
+    /// Table that maps bytes to counts of the enabled bits in each value
+    /// from 0 to 255.
+    static const char nbits_[NBITS];
+};
+
+
+3. fd_set definition (on Linux platform)
+
+//file: Glibc/misc/sys/select.h
+
+/* The fd_set member is required to be an array of longs.  */
+typedef long int __fd_mask;
+
+#define __NFDBITS	(8 * sizeof (__fd_mask))
+
+/* Number of descriptors that can fit in an `fd_set'.  */
+#define	__FD_SETSIZE		1024
+
+
+/* fd_set for select and pselect.  */
+typedef struct
+  {
+    /* XPG4.2 requires this member name.  Otherwise avoid the name
+       from the global namespace.  */
+#ifdef __USE_XOPEN
+    __fd_mask fds_bits[__FD_SETSIZE / __NFDBITS];
+    # define __FDS_BITS(set) ((set)->fds_bits)
+#else
+    __fd_mask __fds_bits[__FD_SETSIZE / __NFDBITS];
+    # define __FDS_BITS(set) ((set)->__fds_bits)
+#endif
+  } fd_set;
+
+/* Maximum number of file descriptors in `fd_set'.  */
+#define	FD_SETSIZE		__FD_SETSIZE
+
+实际上，fd_set结构里面就是一个长度为32的long int数组，即
+long int fds_bits[32];
+
+
+4. fd_set definition (on win32 platform)
+
+//file: $vsinstalldir\vc\platformsdk\include\winsock2.h
+
+/*
+ * Select uses arrays of SOCKETs.  These macros manipulate such
+ * arrays.  FD_SETSIZE may be defined by the user before including
+ * this file, but the default here should be >= 64.
+ *
+ * CAVEAT IMPLEMENTOR and USER: THESE MACROS AND TYPES MUST BE
+ * INCLUDED IN WINSOCK2.H EXACTLY AS SHOWN HERE.
+ */
+#ifndef FD_SETSIZE
+#define FD_SETSIZE      64
+#endif /* FD_SETSIZE */
+
+typedef struct fd_set {
+        u_int fd_count;               /* how many are SET? */
+        SOCKET  fd_array[FD_SETSIZE];   /* an array of SOCKETs */
+} fd_set;

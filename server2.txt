@@ -1,0 +1,64 @@
+spawn ./server2
+---------------------------------------------
+input command to test the program
+ s or S : start the talker (ACE Task)
+ q or Q : quit
+---------------------------------------------
+$ input command >s
+(3078203088) main::start
+(3078203088) MyTask start
+(3078200176) enter MyTask::svc()
+
+(3078200176) in Handler()
+
+recv: No. = 1, host = localhost, IP = 7f000001, port = 45064, bytes = 21
+      data = a ACE_SOCK_Dgram test
+(3078200176) handle_events(10) succeed, result = 1
+
+recv: No. = 2, host = localhost, IP = 7f000001, port = 35930, bytes = 21
+      data = a ACE_SOCK_Dgram test
+(3078200176) handle_events(10) succeed, result = 1
+
+(3078200176) handle_events(10) timeout, result = 0
+
+(3078200176) MyTask2 start
+(3069807472) enter MyTask2::svc()
+
+(3069807472) MyTask2::svc() register ACE_STDIN handler
+(3078200176) handle_events(10) succeed, result = 1
+
+(3069807472) MyTask2::svc() remove ACE_STDIN handler
+
+(3078200176) handle_events(10) succeed, result = 1
+
+(3069807472) MyTask2::svc() register ACE_STDIN handler
+(3078200176) handle_events(10) succeed, result = 1
+
+(3069807472) MyTask2::svc() remove ACE_STDIN handler
+
+(3078200176) handle_events(10) succeed, result = 1
+
+(3069807472) exit MyTask2::svc()
+
+(3078200176) handle_events(10) timeout, result = 0
+
+(3078200176) MyTask2 start
+(3061414768) enter MyTask2::svc()
+
+(3061414768) MyTask2::svc() register ACE_STDIN handler
+(3078200176) handle_events(10) succeed, result = 1
+
+(3078200176) exit MyTask::svc()
+
+(3078200176) in ~Handler()
+
+(3061414768) MyTask2::svc() remove ACE_STDIN handler
+
+(3061414768) MyTask2::svc() register ACE_STDIN handler
+(3061414768) MyTask2::svc() remove ACE_STDIN handler
+
+(3061414768) exit MyTask2::svc()
+
+(3078203088) main::end
+
+$ input command >

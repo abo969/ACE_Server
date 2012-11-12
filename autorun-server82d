@@ -1,0 +1,19 @@
+#! /usr/bin/expect -f
+
+package require Thread 
+set t [thread::create]  ;# Create a thread 
+
+spawn ./server82d
+expect -exact "$ input command >"
+send -- "s\r"
+expect -exact "main::start"
+expect -exact "in Handler()"
+expect -exact "exit MyTask2::svc()"
+
+thread::send -async $t [exec ./autorun-client]
+
+expect -exact "exit MyTask::svc()"
+expect -exact "main::end"
+expect -exact "$ input command >"
+send -- "q\r"
+expect -exact "calling ACE_Task<ACE_SYNCH_USE>::~ACE_Task"

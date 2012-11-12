@@ -1,0 +1,15 @@
+>	ACEd.dll!ACE_Select_Reactor_Handler_Repository::bind(void * handle=0x00000f44, ACE_Event_Handler * event_handler=0x00ad3248, unsigned long mask=1)  Line 261 + 0x1c bytes	C++
+ 	test.exe!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::register_handler_i(void * handle=0x00000f44, ACE_Event_Handler * event_handler=0x00ad3248, unsigned long mask=1)  Line 996 + 0x1a bytes	C++
+ 	test.exe!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::register_handler(void * handle=0x00000f44, ACE_Event_Handler * handler=0x00ad3248, unsigned long mask=1)  Line 287 + 0x1e bytes	C++
+ 	ACEd.dll!ACE_Select_Reactor_Notify::open(ACE_Reactor_Impl * r=0x00ac2c68, ACE_Timer_Queue_T<ACE_Event_Handler *,ACE_Event_Handler_Handle_Timeout_Upcall<ACE_Recursive_Thread_Mutex>,ACE_Recursive_Thread_Mutex> * __formal=0x00000000, int disable_notify_pipe=0)  Line 639 + 0x27 bytes	C++
+ 	test.exe!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::open(unsigned int size=1024, int restart=0, ACE_Sig_Handler * sh=0x00000000, ACE_Timer_Queue_T<ACE_Event_Handler *,ACE_Event_Handler_Handle_Timeout_Upcall<ACE_Recursive_Thread_Mutex>,ACE_Recursive_Thread_Mutex> * tq=0x00000000, int disable_notify_pipe=0, ACE_Reactor_Notify * notify=0x00000000)  Line 425 + 0x25 bytes	C++
+ 	test.exe!ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >(ACE_Sig_Handler * sh=0x00000000, ACE_Timer_Queue_T<ACE_Event_Handler *,ACE_Event_Handler_Handle_Timeout_Upcall<ACE_Recursive_Thread_Mutex>,ACE_Recursive_Thread_Mutex> * tq=0x00000000, int disable_notify_pipe=0, ACE_Reactor_Notify * notify=0x00000000, int mask_signals=1, int s_queue=-1)  Line 493 + 0x1f bytes	C++
+ 	test.exe!MyTask::svc()  Line 136 + 0x3a bytes	C++
+ 	ACEd.dll!ACE_Task_Base::svc_run(void * args=0x00ac115c)  Line 275 + 0xf bytes	C++
+ 	ACEd.dll!ACE_Thread_Adapter::invoke_i()  Line 149 + 0x9 bytes	C++
+ 	ACEd.dll!ACE_Thread_Adapter::invoke()  Line 98 + 0xf bytes	C++
+ 	ACEd.dll!ace_thread_adapter(void * args=0x00ac1600)  Line 124 + 0xf bytes	C++
+ 	msvcr80d.dll!_callthreadstartex()  Line 348 + 0xf bytes	C
+ 	msvcr80d.dll!_threadstartex(void * ptd=0x00ac18c8)  Line 331	C
+ 	kernel32.dll!7c80b729() 	
+ 	[Frames below may be incorrect and/or missing, no symbols loaded for kernel32.dll]	

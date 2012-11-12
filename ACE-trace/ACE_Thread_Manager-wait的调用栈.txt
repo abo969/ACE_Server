@@ -1,0 +1,26 @@
+(gdb) p handler 
+$86 = {<ACE_Event_Handler> = {_vptr.ACE_Event_Handler = 0x805fba8, reference_count_ = {value_ = 1, 
+      static increment_fn_ = 0xf13c80 <multi_cpu_increment>, static decrement_fn_ = 0xf13ca0 <multi_cpu_decrement>, 
+      static exchange_fn_ = 0xf13cc0 <multi_cpu_exchange>, static exchange_add_fn_ = 0xf13cd0 <multi_cpu_exchange_add>}, priority_ = 0, 
+    reactor_ = 0x0, reference_counting_policy_ = {<ACE_Event_Handler::Policy> = {_vptr.Policy = 0xfe6638}, 
+      value_ = ACE_Event_Handler::Reference_Counting_Policy::DISABLED}}, dgramt_ = {<ACE_SOCK> = {<ACE_IPC_SAP> = {handle_ = 8, 
+        static pid_ = 0}, <No data fields>}, <No data fields>}, addr_ = {<ACE_Addr> = {_vptr.ACE_Addr = 0xfe6708, static sap_any = {
+        _vptr.ACE_Addr = 0xfe5838, static sap_any = <same as static member of an already seen type>, addr_type_ = -1, addr_size_ = -1}, 
+      addr_type_ = 2, addr_size_ = 16}, inet_addr_ = {in4_ = {sin_family = 2, sin_port = 61465, sin_addr = {s_addr = 0}, 
+        sin_zero = "\000\000\000\000\000\000\000"}}}, static recv_count = 0}
+
+
+
+ACE_Thread_Manager::instance ()->wait ();
+
+(gdb) bt
+#0  0x00b2e422 in __kernel_vsyscall ()
+#1  0x00e43e15 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib/tls/i686/cmov/libpthread.so.0
+#2  0x00f1d814 in cond_timedwait (this=0xfffffe00, mutex=..., abstime=0x0) at ../../ace/OS_NS_Thread.inl:357
+#3  ACE_Condition_Thread_Mutex::wait (this=0xfffffe00, mutex=..., abstime=0x0) at ../../ace/Condition_Thread_Mutex.cpp:100
+#4  0x00f1d87b in ACE_Condition_Thread_Mutex::wait (this=0x806a870, abstime=0x0) at ../../ace/Condition_Thread_Mutex.cpp:107
+#5  0x00fa460a in ACE_Thread_Manager::wait (this=0x806a828, timeout=0x0, abandon_detached_threads=false, use_absolute_time=true)
+    at ../../ace/Thread_Manager.cpp:1638
+#6  0x0805456f in start_task () at server8.cpp:309
+#7  0x0805461a in main (argc=1, argv=0xbffff7d4) at server8.cpp:325
+        

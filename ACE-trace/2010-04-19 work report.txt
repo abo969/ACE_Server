@@ -1,0 +1,237 @@
+work report
+
+
+1. introduction
+
+    About natural exiting from ACE_Reactor::handle_events when receiving data from socket (client sends data).
+
+2. handle_events and select/poll analysis
+
+    platform: Linux
+
+    logic flow:
+    (1) Server wait for data on the port, using select to wait for events
+    (2) Client send data to the port
+    (3) Server receive the data from the port and show them, and send the data back, and go on waiting ...
+    (4) Client receive the back data and show them, then end
+    Notation: client will be run manually when sending data.
+
+    in this mode, ACE_Reactor is used, and one handler to handle socket input is registered manually, and another handler to handle notification input (ACE_Pipe read handle) is registered automatically during the construction ACE_Select_Reactor.
+
+    handle_events flow:
+
+    -------------------------------------------------------------------
+    =>handle_events                             user space
+     ->wait_for_multiple_events
+      ->ACE_OS::select
+       ->::select  //linux system call
+    -------------------------------------------------------------------
+        ->sys_select                            kernel space
+         ->do_select
+          ->poll_initwait
+           ->init_poll_funcptr
+          ->poll<--   //for each fd
+           |      |
+           |------|
+          ->schedule_timeout  //if timeout does not expire, and no signal, it will sleep
+          ->poll_freewait
+    -------------------------------------------------------------------
+     ->dispatch                                 user space
+      ->dispatch_notification_handlers
+       ->...
+      ->dispatch_io_handlers
+       ->...
+    -------------------------------------------------------------------
+      
+    when any events occurs which are related with the registered handlers such as read-handle of ACE_Pipe object notification_pipe_, our user-defined handlers, select will be woken up. after sleep, the state of thread will be changed TASK_RUNNING, it can be scheduled to run.
+    where, poll function is implemented in the related driver of fds in the fd_set. then, in this poll, it will add this calling thread into the wait-queue of the related driver fd by the following flow.
+
+    ->poll
+     ->poll_wait
+      ->__pollwait
+       ->init_waitqueue_entry
+       ->add_wait_queue
+
+    select can be referenced by <wakeup of select analysis.txt>.
+
+3. problem analysis
+
+3.1 research method
+
+    for Server, there are two threads (or tasks), thread A and thread B. Thread A is responsible for handle_events, and B is another thread responsible for registering and removing other handlers.
+
+3.2 problems investigated
+
+(1) why not call notify during ACE_Select_Reactor construction?
+
+    During the construction of ACE_Select_Reactor, it will register a ACE_Pipe read-handle by the following code for ACE_Select_Reactor itself. It will use this ACE_Pipe to receive notification.
+
+    //file: ace/Select_Reactor_Base.cpp
+    int ACE_Select_Reactor_Notify::open (ACE_Reactor_Impl *r, ACE_Timer_Queue *, int disable_notify_pipe)
+    {
+      ACE_TRACE ("ACE_Select_Reactor_Notify::open");
+    
+      if (disable_notify_pipe == 0)
+        {
+          //...
+    	  
+      	  if (ACE::set_flags (this->notification_pipe_.read_handle (), ACE_NONBLOCK) == -1)
+            return -1;
+          else
+            return this->select_reactor_->register_handler(
+    		    this->notification_pipe_.read_handle (),
+    			this,
+    			ACE_Event_Handler::READ_MASK);
+        }
+      else
+        {
+          this->select_reactor_ = 0;
+          return 0;
+        }
+    }
+
+    ->ACE_Select_Reactor_T::ACE_Select_Reactor_T
+	   ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::open
+	    ->ACE_Select_Reactor_Notify::open
+	     ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::register_handler
+	      ->ACE_Guard::ACE_Guard
+	  	   ->ACE_Guard<ACE_Reactor_Token_T<ACE_Token> >::acquire
+	  	    ->ACE_Token::acquire
+	  	     ->ACE_Token::shared_acquire  //here, it will return directly because ACE_Thread::self() = this->owner_
+	  	  ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::register_handler_i
+	  	   ->ACE_Select_Reactor_Handler_Repository::bind
+
+    But, in ACE_Token::shared_acquire, ACE_Thread::self () does equal this->owner_, then, it will return directly, not call ACE_Reactor_Token_T<ACE_Token>::sleep_hook, therefore, ACE_Select_Reactor_T::notify will not be invoked.
+
+(2) why not call notify when thread A registers user-defined handlers?
+
+    As (1), ACE_Reactor::register_handler will finally call ACE_Token::shared_acquire, but running into this function, this->in_use_=0, it will return directly, as the following code shows.
+
+    //file: ace/Token.cpp
+    int ACE_Token::shared_acquire (void (*sleep_hook_func)(void *),
+                               void *arg,
+                               ACE_Time_Value *timeout,
+                               ACE_Token_Op_Type op_type)
+    {
+      //...
+      
+      ACE_thread_t const thr_id = ACE_Thread::self ();
+    
+      // Nobody holds the token.
+      if (!this->in_use_)
+        {
+          // Its mine!
+          this->in_use_ = op_type;
+          this->owner_ = thr_id;
+          return 0;
+        }
+      
+      //
+      // Someone already holds the token.
+      //
+      
+      // Check if it is us.
+      if (ACE_OS::thr_equal (thr_id, this->owner_))
+        {
+          ++this->nesting_level_;
+          return 0;
+        }
+      
+      //...
+    }
+    
+    ->ACE_Reactor::register_handler
+     ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::register_handler
+      ->ACE_Guard::ACE_Guard
+       ->ACE_Token::acquire
+        ->ACE_Token::shared_acquire  //here, it will return directly because this->in_use_=0
+	  	->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::register_handler_i
+	  	 ->ACE_Select_Reactor_Handler_Repository::bind
+
+(3) why not call notify when thread A removes user-defined handlers?
+
+    As (2), ACE_Reactor::remove_handler will finally call ACE_Token::shared_acquire, but running into this function, this->in_use_=0, it will return directly, as the above code shows.
+
+    ->ACE_Reactor::remove_handler
+     ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::remove_handler
+      ->ACE_Guard::ACE_Guard
+       ->ACE_Token::acquire
+        ->ACE_Token::shared_acquire  //here, it will return directly because this->in_use_=0
+	  	->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::remove_handler_i
+	  	 ->ACE_Select_Reactor_Handler_Repository::unbind
+
+(4) why does it call notify when thread B registers a new handlers?
+
+    In another thread, ACE_Reactor::register_handler will also finally call ACE_Token::share_acquire, but running into this function, alrough this->in_use_>0, ACE_Thread::self () does not equal this->owner_, then, it will call ACE_Reactor_Token_T<ACE_Token>::sleep_hook, therefore, ACE_Select_Reactor_T::notify will be invoked.
+
+    ->ACE_Reactor::register_handler
+     ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::register_handler
+      ->ACE_Guard::ACE_Guard
+       ->ACE_Token::acquire
+        ->ACE_Token::shared_acquire  //here, it will invoke sleep_hoop
+         ->ACE_Reactor_Token_T<ACE_Token>::sleep_hook
+          ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::notify
+           ->ACE_Select_Reactor_Notify::notify
+            ->ACE::send
+             ->ACE::send_i
+              ->ACE_OS::send
+               ->::write  //Linux system call
+	  	->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::register_handler_i
+	  	 ->ACE_Select_Reactor_Handler_Repository::bind
+
+    Linux system call ::write will write the notification buffer to ACE_Pipe object, that is, notification_pipe_.
+    Besides, in ACE_Reactor_Token_T<ACE_Token>::sleep_hook, it invokes notify by default parameters like this->reactor_->notify();
+    
+    /**
+     * Called by a thread when it wants to unblock the
+     * ACE_Select_Reactor.  This wakeups the ACE_Select_Reactor if
+     * currently blocked in @c select/poll.  Pass over both the
+     * @c Event_Handler *and* the @c mask to allow the caller to dictate
+     * which @c Event_Handler method the ACE_Select_Reactor will
+     * invoke.  The ACE_Time_Value indicates how long to blocking
+     * trying to notify the ACE_Select_Reactor.  If @a timeout == 0,
+     * the caller will block until action is possible, else will wait
+     * until the relative time specified in @c *timeout elapses).
+     */
+    virtual int notify (ACE_Event_Handler * = 0,
+                        ACE_Reactor_Mask = ACE_Event_Handler::EXCEPT_MASK,
+                        ACE_Time_Value * timeout = 0);
+
+(5) why does it call notify when thread B removes a new handlers?
+
+    As (4), in another thread, ACE_Reactor::remove_handler will also finally call ACE_Token::share_acquire, and the same reason, it will invoke ACE_Reactor_Token_T<ACE_Token>::sleep_hook, therefore, ACE_Select_Reactor_T::notify will be invoked.
+
+    ->ACE_Reactor::remove_handler
+     ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::remove_handler
+      ->ACE_Guard::ACE_Guard
+       ->ACE_Token::acquire
+        ->ACE_Token::shared_acquire  //here, it will invoke sleep_hoop
+         ->ACE_Reactor_Token_T<ACE_Token>::sleep_hook
+          ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::notify
+           ->ACE_Select_Reactor_Notify::notify
+            ->ACE::send
+             ->ACE::send_i
+              ->ACE_OS::send
+               ->::write  //Linux system call
+	  	->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::remove_handler_i
+	  	 ->ACE_Select_Reactor_Handler_Repository::unbind
+
+
+4. conclusion
+
+    On linux platform, it wakes up the forever-loop handle_events by ACE-notification mechanism. it is implemented by ACE_Pipe notification_pipe_ in ACE_Select_Reactor_Notify. ACE_Pipe has a private data member, ACE_HANDLE handles_[2], where, handles_[0] is its read handle, which is registered automatically during the construction of ACE_Select_Reactor when opening its notify_handler_ (ACE_Select_Reactor_Notify).
+    as for waiting in select and wakeup, it is implemented by wait-queue, if all fds are not ready, it will add the current thread, that it, the thread calling select, into the wait-queue of this resource, when any one of fd in the fd_set, the wait-queue will be waken up, then, it continues to execute select, and dispatches the events.
+
+
+5. reference
+
+    <为什么ACE_Select_Reactor构造时注册的ACE_Pipe的read handle没有引起notify的调用？.txt>
+    <为什么register自定义的handler没有引起notify的调用？.txt>
+    <为什么remove自定义的handler没有引起notify的调用？.txt>
+    <为什么在另一线程中register自定义的handler会引起notify的调用？.txt>
+    <为什么在另一线程中remove自定义的handler会引起notify的调用？.txt>
+    <ACE_Select_Reactor对象的内存结构.txt>
+    <ACE_Select_Reactor的Handle Set对象.txt>
+    <ACE_Select_Reactor的Handler Repository对象.txt>
+    <Linux平台上另一线程中ACE_Reactor-register_handler和remove_handler流程分析.txt>
+    <wakeup of select analysis.txt>

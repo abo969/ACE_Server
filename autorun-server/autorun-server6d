@@ -1,0 +1,13 @@
+#! /usr/bin/expect -f
+
+spawn ./server6d
+expect -exact "$ input command >"
+send -- "s\r"
+expect -exact "main::start"
+exec ./client 2>/dev/null
+after 1000
+exec ./client 2>/dev/null
+expect -exact "exit MyTask::svc()"
+expect -exact "main::end"
+expect -exact "$ input command >"
+send -- "q\r"

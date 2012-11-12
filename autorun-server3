@@ -1,0 +1,11 @@
+#! /usr/bin/expect -f
+
+spawn ./server3
+expect -exact "main::start"
+expect -exact "in Handler()"
+exec ./client 2>/dev/null
+after 1000
+exec ./client 2>/dev/null
+expect -exact "exit MyTask::svc()"
+expect -exact "main::end"
+send -- "q\r"

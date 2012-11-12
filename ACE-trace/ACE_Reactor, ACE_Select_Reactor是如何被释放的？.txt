@@ -1,0 +1,162 @@
+ACE_Reactor, ACE_Select_Reactor是如何被释放的？
+
+->_start               //glibc runtime library
+ ->__libc_start_main
+  ->exit
+   ->_fini             //ACE runtime library
+    ->__do_global_dtors_aux
+	 ->__cxa_finalize
+	  ->~ACE_Object_Manager_Manager
+	   ->~ACE_Object_Manager
+	    ->ACE_Object_Manager::fini 
+		 ->ACE_OS_Exit_Info::call_hooks
+		  ->ace_cleanup_destroyer
+		   ->ACE_Singleton<MyTask, ACE_Thread_Mutex>::cleanup
+		    ->~ACE_Singleton
+			 ->~MyTask
+
+# gdb ./server98
+GNU gdb (GDB) 7.0-ubuntu
+Copyright (C) 2009 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "i486-linux-gnu".
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>...
+Reading symbols from /mnt/hgfs/programming/win32/Server/server98...done.
+(gdb) b MyTask::~MyTask
+Breakpoint 1 at 0x80533f8: file server98.cpp, line 148. (3 locations)
+(gdb) r
+Starting program: /mnt/hgfs/programming/win32/Server/server98 
+[Thread debugging using libthread_db enabled]
+---------------------------------------------
+input command to test the program
+ s or S : start the talker (ACE Task)
+ q or Q : quit
+---------------------------------------------
+$ input command >s
+(3086931664) main::start
+(3086931664) in MyTask:: MyTask()
+(3086931664) MyTask start
+[New Thread 0xb7fecb70 (LWP 15658)]
+(3086928752) enter MyTask::svc()
+
+(3086928752) in Handler()
+
+(3086928752) MyTask2 start
+[New Thread 0xb77ebb70 (LWP 15659)]
+(3078536048) enter MyTask2::svc()
+
+(3078536048) MyTask2::svc() register exit handler
+(3086928752) handle_events() succeed, result = 1
+
+(3078536048) MyTask2::svc() remove exit handler
+
+(3086928752) handle_events() succeed, result = 1
+
+(3078536048) MyTask2::svc() register exit handler
+(3086928752) handle_events() succeed, result = 1
+
+(3078536048) MyTask2::svc() remove exit handler
+
+(3086928752) handle_events() succeed, result = 1
+
+(3078536048) exit MyTask2::svc()
+
+[Thread 0xb77ebb70 (LWP 15659) exited]
+recv: No. = 1, host = localhost, IP = 7f000001, port = 42110, bytes = 21
+      data = a ACE_SOCK_Dgram test
+(3086928752) handle_events() succeed, result = 1
+
+recv: No. = 2, host = localhost, IP = 7f000001, port = 38464, bytes = 21
+      data = a ACE_SOCK_Dgram test
+(3086928752) handle_events() succeed, result = 1
+
+(3086928752) MyTask::svc() notify the exit handler
+(3086928752) handle_exception: handle the exit handler
+(3086928752) handle_events() succeed, result = 1
+
+(3086928752) exit MyTask::svc()
+
+[Thread 0xb7fecb70 (LWP 15658) exited]
+(3086931664) main::end
+
+$ input command >q
+
+Breakpoint 1, ~MyTask (this=0x806b774, __in_chrg=<value optimized out>) at server98.cpp:148
+148     MyTask::~MyTask()
+(gdb) bt
+#0  ~MyTask (this=0x806b774, __in_chrg=<value optimized out>) at server98.cpp:148
+#1  0x08058a93 in ~ACE_Singleton (this=0x806b770, __in_chrg=<value optimized out>) at /usr/local/include/ace/Singleton.h:80
+#2  0x0805a776 in ACE_Singleton<MyTask, ACE_Thread_Mutex>::cleanup (this=0x806b770) at /usr/local/include/ace/Singleton.cpp:111
+#3  0x006f1028 in ace_cleanup_destroyer (object=0x806b770, param=0x0) at ../../ace/Cleanup.cpp:33
+#4  0x006f1279 in ACE_OS_Exit_Info::call_hooks (this=0x80681e0) at ../../ace/Cleanup.cpp:183
+#5  0x0073b0ea in ACE_Object_Manager::fini (this=0x80681d0) at ../../ace/Object_Manager.cpp:645
+#6  0x0073b354 in ~ACE_Object_Manager (this=0x80681d0, __in_chrg=<value optimized out>) at ../../ace/Object_Manager.cpp:354
+#7  0x0073bf64 in ~ACE_Object_Manager_Manager (this=0x7c0e70, __in_chrg=<value optimized out>) at ../../ace/Object_Manager.cpp:801
+#8  0x00231428 in __cxa_finalize () from /lib/tls/i686/cmov/libc.so.6
+#9  0x006d88c4 in __do_global_dtors_aux () from /usr/local/lib/libACE-5.6.4.so
+#10 0x007826e0 in _fini () from /usr/local/lib/libACE-5.6.4.so
+#11 0x00e9ef46 in ?? () from /lib/ld-linux.so.2
+#12 0x0023105f in ?? () from /lib/tls/i686/cmov/libc.so.6
+#13 0x002310cf in exit () from /lib/tls/i686/cmov/libc.so.6
+#14 0x00218b5e in __libc_start_main () from /lib/tls/i686/cmov/libc.so.6
+#15 0x080531b1 in _start () at ../sysdeps/i386/elf/start.S:119
+(gdb) n
+150         ACE_DEBUG ((LM_INFO, "(%t) in MyTask:: ~MyTask() 1\n"));
+(gdb) p this
+$1 = (MyTask * const) 0x806b774
+(gdb) p *this
+$2 = {<ACE_Task<ACE_NULL_SYNCH>> = {<ACE_Task_Base> = {<ACE_Service_Object> = {<ACE_Event_Handler> = {_vptr.ACE_Event_Handler = 0x8060828, 
+          reference_count_ = {value_ = 1, static increment_fn_ = 0x6e8c80 <multi_cpu_increment>, 
+            static decrement_fn_ = 0x6e8ca0 <multi_cpu_decrement>, static exchange_fn_ = 0x6e8cc0 <multi_cpu_exchange>, 
+            static exchange_add_fn_ = 0x6e8cd0 <multi_cpu_exchange_add>}, priority_ = 0, reactor_ = 0x806f510, 
+          reference_counting_policy_ = {<ACE_Event_Handler::Policy> = {_vptr.Policy = 0x7bb638}, 
+            value_ = ACE_Event_Handler::Reference_Counting_Policy::DISABLED}}, <ACE_Shared_Object> = {
+          _vptr.ACE_Shared_Object = 0x80608a8}, <No data fields>}, thr_count_ = 0, thr_mgr_ = 0x806b838, flags_ = 0, grp_id_ = 1, lock_ = {
+        lock_ = {__data = {__lock = 0, __count = 0, __owner = 0, __kind = 0, __nusers = 0, {__spins = 0, __list = {__next = 0x0}}}, 
+          __size = '\000' <repeats 23 times>, __align = 0}, removed_ = false}, last_thread_id_ = 3086928752}, msg_queue_ = 0x806b7e8, 
+    delete_msg_queue_ = true, mod_ = 0x0, next_ = 0x0}, static MAX_USER_THREAD = 1, exit_flag = 1, handler = 0x8070590, 
+  Reactor = 0x806f510, Selector = 0x806dbb8}
+(gdb) n
+(3086931664) in MyTask:: ~MyTask() 1
+152         delete Reactor;
+(gdb) 
+153         Reactor = NULL;
+(gdb) 
+154         ACE_DEBUG ((LM_INFO, "(%t) in MyTask:: ~MyTask() 2\n"));
+(gdb) 
+(3086931664) in MyTask:: ~MyTask() 2
+156         delete Selector;
+(gdb) 
+157         Selector = NULL;
+(gdb) 
+158         ACE_DEBUG ((LM_INFO, "(%t) in MyTask:: ~MyTask() 3\n"));
+(gdb) 
+(3086931664) in MyTask:: ~MyTask() 3
+160         delete handler;
+(gdb) 
+(3086931664) in ~Handler()
+161         handler = NULL;
+(gdb) 
+162         ACE_DEBUG ((LM_INFO, "(%t) in MyTask:: ~MyTask() 4\n"));
+(gdb) p *this
+$3 = {<ACE_Task<ACE_NULL_SYNCH>> = {<ACE_Task_Base> = {<ACE_Service_Object> = {<ACE_Event_Handler> = {_vptr.ACE_Event_Handler = 0x8060828, 
+          reference_count_ = {value_ = 1, static increment_fn_ = 0x6e8c80 <multi_cpu_increment>, 
+            static decrement_fn_ = 0x6e8ca0 <multi_cpu_decrement>, static exchange_fn_ = 0x6e8cc0 <multi_cpu_exchange>, 
+            static exchange_add_fn_ = 0x6e8cd0 <multi_cpu_exchange_add>}, priority_ = 0, reactor_ = 0x806f510, 
+          reference_counting_policy_ = {<ACE_Event_Handler::Policy> = {_vptr.Policy = 0x7bb638}, 
+            value_ = ACE_Event_Handler::Reference_Counting_Policy::DISABLED}}, <ACE_Shared_Object> = {
+          _vptr.ACE_Shared_Object = 0x80608a8}, <No data fields>}, thr_count_ = 0, thr_mgr_ = 0x806b838, flags_ = 0, grp_id_ = 1, lock_ = {
+        lock_ = {__data = {__lock = 0, __count = 0, __owner = 0, __kind = 0, __nusers = 0, {__spins = 0, __list = {__next = 0x0}}}, 
+          __size = '\000' <repeats 23 times>, __align = 0}, removed_ = false}, last_thread_id_ = 3086928752}, msg_queue_ = 0x806b7e8, 
+    delete_msg_queue_ = true, mod_ = 0x0, next_ = 0x0}, static MAX_USER_THREAD = 1, exit_flag = 1, handler = 0x0, Reactor = 0x0, 
+  Selector = 0x0}
+(gdb) c
+Continuing.
+(3086931664) in MyTask:: ~MyTask() 4
+
+Program exited normally.
+(gdb) q

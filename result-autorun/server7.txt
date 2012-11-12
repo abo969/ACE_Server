@@ -1,0 +1,35 @@
+spawn ./server7
+---------------------------------------------
+input command to test the program
+ s or S : start the talker (ACE Task)
+ q or Q : quit
+---------------------------------------------
+$ input command >s
+(3078584016) main::start
+(3078584016) in MyTask()
+
+(3078584016) MyTask start
+(3078581104) enter MyTask::svc()
+
+(3078581104) in Handler()
+
+recv: No. = 1, host = localhost, IP = 7f000001, port = 33963, bytes = 21
+      data = a ACE_SOCK_Dgram test
+(3078581104) handle_events(10) succeed, result = 1
+
+recv: No. = 2, host = localhost, IP = 7f000001, port = 59654, bytes = 21
+      data = a ACE_SOCK_Dgram test
+(3078581104) handle_events(10) succeed, result = 1
+
+(3078581104) handle_events(10) timeout, result = 0
+
+(3078581104) handle_events(10) succeed, result = 1
+
+(3078581104) exit MyTask::svc()
+
+(3078581104) in ~Handler()
+
+(3078584016) main::end
+
+(3078584016) in ~MyTask()
+$ input command >

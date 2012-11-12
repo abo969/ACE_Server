@@ -1,0 +1,787 @@
+(gdb) p this
+$57 = (ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> > * const) 0x806cba8
+(gdb) p *this
+$58 = 
+{
+    <ACE_Select_Reactor_Impl> = 
+    {
+        <ACE_Reactor_Impl> = 
+        {
+            _vptr.ACE_Reactor_Impl = 0x805fcc8
+        }, 
+        
+        //ACE_Select_Reactor_Handler_Repository handler_rep_;
+        handler_rep_ = 
+        {
+            select_reactor_ = @0x806cba8, //it is 'this' pointer, that is, ACE_Select_Reactor
+            max_handlep1_ = 8, 
+            event_handlers_ = 
+            {
+                max_size_ = 1024, 
+                cur_size_ = 1024, 
+                array_ = 0x806d4f8, 
+                allocator_ = 0xfebd80
+            }
+        }, 
+        
+        //ACE_Select_Reactor_Handle_Set dispatch_set_;
+        dispatch_set_ = 
+        {
+            //ACE_Handle_Set rd_mask;
+            rd_mask_ = 
+            {
+                size_ = 2, 
+                max_handle_ = 7, 
+                min_handle_ = 5, 
+                mask_ = 
+                {
+                    fds_bits = {0 <repeats 32 times>}
+                }, 
+                static nbits_ = "\000\001\001\002\001\002\002\003\001\002\002\003\002\003\003\004\001\002\002\..."...
+            }, 
+            
+            //ACE_Handle_Set wr_mask;
+            wr_mask_ = {size_ = 0, max_handle_ = -1, min_handle_ = 1024, mask_ = {fds_bits = {0 <repeats 32 times>}}, 
+                static nbits_ = "\000\001\001\002\001\002\002\003\001\002\002\003\002\003\003\004\001\002\002\..."...}, 
+            
+            //ACE_Handle_Set ex_mask
+            ex_mask_ = {size_ = 0, max_handle_ = -1, min_handle_ = 1024, mask_ = {fds_bits = {0 <repeats 32 times>}}, 
+                static nbits_ = "\000\001\001\002\001\002\002\003\001\002\002\003\002\003\003\004\001\002\002\..."...}
+        }, 
+        
+        //ACE_Select_Reactor_Handle_Set wait_set_;
+        wait_set_ = {
+            rd_mask_ = {size_ = 2, max_handle_ = 7, min_handle_ = 5, mask_ = {fds_bits = {160, 0 <repeats 31 times>}}, 
+                static nbits_ = "\000\001\001\002\001\002\002\003\001\002\002\003\002\003\003\004\001\002\002\..."...}, 
+            wr_mask_ = {size_ = 0, max_handle_ = -1, min_handle_ = 1024, mask_ = {fds_bits = {0 <repeats 32 times>}}, 
+                static nbits_ = "\000\001\001\002\001\002\002\003\001\002\002\003\002\003\003\004\001\002\002\..."...}, 
+            ex_mask_ = {size_ = 0, max_handle_ = -1, min_handle_ = 1024, mask_ = {fds_bits = {0 <repeats 32 times>}}, 
+                static nbits_ = "\000\001\001\002\001\002\002\003\001\002\002\003\002\003\003\004\001\002\002\..."...}}, 
+        
+        //ACE_Select_Reactor_Handle_Set suspend_set_;
+        suspend_set_ = {
+            rd_mask_ = {size_ = 0, max_handle_ = -1, min_handle_ = 1024, mask_ = {fds_bits = {0 <repeats 32 times>}}, 
+                static nbits_ = "\000\001\001\002\001\002\002\003\001\002\002\003\002\003\003\004\001\002\002\..."...}, 
+            wr_mask_ = {size_ = 0, max_handle_ = -1, min_handle_ = 1024, mask_ = {fds_bits = {0 <repeats 32 times>}}, 
+                static nbits_ = "\000\001\001\002\001\002\002\003\001\002\002\003\002\003\003\004\001\002\002\..."...}, 
+            ex_mask_ = {size_ = 0, max_handle_ = -1, min_handle_ = 1024, mask_ = {fds_bits = {0 <repeats 32 times>}}, 
+                static nbits_ = "\000\001\001\002\001\002\002\003\001\002\002\003\002\003\003\004\001\002\002\..."...}}, 
+        
+        //ACE_Select_Reactor_Handle_Set ready_set_;
+        ready_set_ = {
+            rd_mask_ = {size_ = 0, max_handle_ = -1, min_handle_ = 1024, mask_ = {fds_bits = {0 <repeats 32 times>}}, 
+                static nbits_ = "\000\001\001\002\001\002\002\003\001\002\002\003\002\003\003\004\001\002\002\..."...}, 
+            wr_mask_ = {size_ = 0, max_handle_ = -1, min_handle_ = 1024, mask_ = {fds_bits = {0 <repeats 32 times>}}, 
+                static nbits_ = "\000\001\001\002\001\002\002\003\001\002\002\003\002\003\003\004\001\002\002\..."...}, 
+            ex_mask_ = {size_ = 0, max_handle_ = -1, min_handle_ = 1024, mask_ = {fds_bits = {0 <repeats 32 times>}}, 
+                static nbits_ = "\000\001\001\002\001\002\002\003\001\002\002\003\002\003\003\004\001\002\002\..."...}}, 
+    
+        //ACE_Timer_Queue *timer_queue_;
+        timer_queue_ = 0x806d2d8, 
+        
+        //ACE_Sig_Handler *signal_handler_;        
+        signal_handler_ = 0x806a9f0, 
+        
+        //ACE_Reactor_Notify *notify_handler_;
+        notify_handler_ = 0x806d4c8, 
+        
+        //bool delete_timer_queue_;
+        delete_timer_queue_ = true,
+        
+        //bool delete_signal_handler_;
+        delete_signal_handler_ = true,
+        
+        //bool delete_notify_handler_;
+        delete_notify_handler_ = true, 
+        
+        //bool initialized;
+        initialized_ = true, 
+        
+        //int restart_;
+        restart_ = 0, 
+        
+        //int requeue_position_;
+        requeue_position_ = -1, 
+        
+        //The original thread that created this Select_Reactor.
+        //ACE_thread_t owner_;
+        owner_ = 3086928752, 
+        
+        //bool state_changed_;
+        state_changed_ = false, 
+        
+        //bool mask_signals_;
+        mask_signals_ = true,
+        
+        //int supress_renew_; 
+        supress_renew_ = 0
+    }, 
+    
+    //ACE_SELECT_REACTOR_TOKEN token_;  //Synchronization token for the MT_SAFE ACE_Select_Reactor.
+    token_ = 
+    {
+        <ACE_Token> = 
+        {
+            _vptr.ACE_Token = 0x805fe80, 
+            
+            //ACE_Token_Queue writers_;  //writer threads
+            writers_ = 
+            {
+                //ACE_Token_Queue_Entry *head_;  //Head of the list of waiting threads.
+                head_ = 0x0, 
+                
+                //ACE_Token_Queue_Entry *tail_;  //Tail of the list of waiting threads.
+                tail_ = 0x0
+            }, 
+            
+            //ACE_Token_Queue readers_;  //reader threads
+            readers_ = 
+            {
+                head_ = 0x0, 
+                tail_ = 0x0
+            }, 
+            
+            //ACE_Thread_Mutex used to lock internal data structures.
+            //ACE_Thread_Mutex lock_;
+            lock_ = 
+            {          
+                //ACE_thread_mutex_t lock_;  //Mutex type that supports single-process locking efficiently.
+                lock_ = 
+                {
+                    __data = 
+                    {
+                        __lock = 0,    //int __lock;
+                        __count = 0,   //unsigned int __count;
+                        __owner = 0,   //int __owner;
+                        __kind = 0,    //int __kind;
+                        __nusers = 0,  //unsigned int __nusers;
+                        {
+                            __spins = 0,  //int __spin;
+                            
+                            //__pthread_slist_t __list;
+                            __list = 
+                            {
+                                __next = 0x0
+                            }
+                        }
+                    },
+                    
+                    //char __size[24];
+                    __size = '\000' <repeats 23 times>, 
+                    __align = 0  //long int __align;
+                }, 
+                
+                /// Keeps track of whether remove() has been called yet to avoid
+                /// multiple <remove> calls, e.g., explicitly and implicitly in the
+                /// destructor.  This flag isn't protected by a lock, so make sure
+                /// that you don't have multiple threads simultaneously calling
+                /// <remove> on the same object, which is a bad idea anyway...
+                //bool removed_;
+                removed_ = false
+            }, 
+            
+            //ACE_thread_t owner_;  //Current owner of the token.
+            owner_ = 3086928752, 
+            
+            //int in_use_;  //Some thread (i.e., <owner_>) is using the token.  
+                            //We need this extra variable to deal with POSIX pthreads madness...
+            in_use_ = 2, 
+            
+            //int waiters_;  //Number of waiters.
+            waiters_ = 0, 
+            
+            //int nesting_level_;  //Current nesting level.
+            nesting_level_ = 0, 
+            
+            //ACE_Condition_Attributes attributes_;  //The attributes for the condition variables, optimizes lock time.
+            attributes_ = 
+            {
+                //ACE_condattr_t attributes_;
+                attributes_ = 
+                {              
+                    __size = "\000\000\000",   //char __size[4];
+                    __align = 0                //long int __align;
+                }
+            },
+            
+            //int queueing_strategy_;  //Queueing strategy, LIFO/FIFO.
+            queueing_strategy_ = -1
+        }, 
+
+        //ACE_Reactor_Impl* reactor_;        
+        reactor_ = 0x806cba8  //it is 'this' pointer, that is, ACE_Select_Reactor
+    }, 
+    
+    //Adapter used to return internal lock to outside world.
+    //ACE_Lock_Adapter<ACE_SELECT_REACTOR_TOKEN> lock_adapter_;
+    lock_adapter_ = 
+    {
+        <ACE_Lock> = {_vptr.ACE_Lock = 0x805fe48},
+        
+        //The concrete locking mechanism that all the methods delegate to. 
+        //ACE_LOCKING_MECHANISM *lock_;
+        lock_ = 0x806d278, 
+        
+        //This flag keep track of whether we are responsible for deleting the lock
+        //bool delete_lock_;
+        delete_lock_ = false
+    }, 
+    
+    // This flag is used to keep track of whether we are actively handling events or not.
+    //sig_atomic_t deactivated_;
+    deactivated_ = 0
+}
+(gdb) p this->token_ 
+$59 = {<ACE_Token> = {_vptr.ACE_Token = 0x805fe80, writers_ = {head_ = 0x0, tail_ = 0x0}, readers_ = {head_ = 0x0, tail_ = 0x0}, lock_ = {
+      lock_ = {__data = {__lock = 0, __count = 0, __owner = 0, __kind = 0, __nusers = 0, {__spins = 0, __list = {__next = 0x0}}}, 
+        __size = '\000' <repeats 23 times>, __align = 0}, removed_ = false}, owner_ = 3086928752, in_use_ = 2, waiters_ = 0, 
+    nesting_level_ = 0, attributes_ = {attributes_ = {__size = "\000\000\000", __align = 0}}, queueing_strategy_ = -1}, 
+  reactor_ = 0x806cba8}
+
+(gdb) p &(this->token_)
+$60 = (ACE_Reactor_Token_T<ACE_Token> *) 0x806d278
+
+(gdb) p this->lock_adapter_
+$61 = {<ACE_Lock> = {_vptr.ACE_Lock = 0x805fe48}, lock_ = 0x806d278, delete_lock_ = false}
+(gdb) p &this->lock_adapter_
+$62 = (ACE_Lock_Adapter<ACE_Reactor_Token_T<ACE_Token> > *) 0x806d2c4
+
+(gdb) p this->lock_adapter_->lock_
+$63 = (ACE_Reactor_Token_T<ACE_Token> *) 0x806d278
+
+//from above, we can conclude that lock_adapter_ data member lock_ is the pointer token_ of ACE_Select_Reactor.
+
+(gdb) p this
+$65 = (ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> > * const) 0x806cba8
+
+(gdb) p this->token_->reactor_
+$66 = (class ACE_Reactor_Impl *) 0x806cba8
+
+//frome above, we can conclude that data member reactor_ of token_ of ACE_Select_Reactor is the pointer of ACE_Select_Reactor itself.
+//it is also the base class ACE_Select_Reactor_Impl data member handler_rep_.select_reactor_.
+
+(gdb) p sizeof(*this)
+$68 = 1836
+(gdb) p sizeof(ACE_Select_Reactor)
+$69 = 1836
+(gdb) p sizeof(ACE_Select_Reactor_Token)
+$70 = 76
+---------------------------------------------------------------------
+
+1. ACE_Select_Reactor definition
+
+//file: ace/Select_Reactor.h
+
+typedef ACE_Reactor_Token_T<ACE_SELECT_TOKEN> ACE_Select_Reactor_Token;
+typedef ACE_Select_Reactor_T<ACE_Select_Reactor_Token> ACE_Select_Reactor;
+
+
+2. ACE_Select_Reactor_T definition
+
+//file: ace/Select_Reactor_T.h
+
+/**
+ * @class ACE_Select_Reactor_T
+ *
+ * @brief An object oriented event demultiplexor and event handler
+ * dispatcher.
+ *
+ * The ACE_Select_Reactor is an object-oriented event
+ * demultiplexor and event handler dispatcher.  The sources of
+ * events that the ACE_Select_Reactor waits for and dispatches
+ * includes I/O events, signals, and timer events.  All public
+ * methods acquire the main ACE_Reactor_Token lock and
+ * call down to private or protected methods, which assume that
+ * the lock is held and so therefore don't (re)acquire the lock.
+ */
+template <class ACE_SELECT_REACTOR_TOKEN>
+class ACE_Select_Reactor_T : public ACE_Select_Reactor_Impl
+{
+public:
+    //...
+
+protected:
+    //...
+    
+    /// Synchronization token for the MT_SAFE ACE_Select_Reactor.
+    ACE_SELECT_REACTOR_TOKEN token_;
+    
+    /// Adapter used to return internal lock to outside world.
+    ACE_Lock_Adapter<ACE_SELECT_REACTOR_TOKEN> lock_adapter_;
+    
+    /// Release the token lock when a Win32 structured exception occurs.
+    int release_token (void);
+    
+    /// Stops the VC++ compiler from bitching about exceptions and destructors
+    int handle_events_i (ACE_Time_Value *max_wait_time = 0);
+    
+    /// This flag is used to keep track of whether we are actively handling
+    /// events or not.
+    sig_atomic_t deactivated_;
+};
+
+
+3. ACE_Select_Reactor_Impl definition
+
+//file: ace/Select_Reactor_Base.h
+
+/**
+ * @class ACE_Select_Reactor_Impl
+ *
+ * @brief This class simply defines how Select_Reactor's basic interface
+ * functions should look like and provides a common base class for
+ * @c Select_Reactor using various locking mechanism.
+ */
+class ACE_Export ACE_Select_Reactor_Impl : public ACE_Reactor_Impl
+{
+public:
+    enum
+    {
+      /// Default size of the Select_Reactor's handle table.
+      DEFAULT_SIZE = ACE_DEFAULT_SELECT_REACTOR_SIZE
+    };
+    
+    /// Constructor.
+    ACE_Select_Reactor_Impl (bool mask_signals = true);
+    
+    //...
+    
+    /// Table that maps <ACE_HANDLEs> to <ACE_Event_Handler *>'s.
+    ACE_Select_Reactor_Handler_Repository handler_rep_;
+    
+    /// Tracks handles that are ready for dispatch from <select>
+    ACE_Select_Reactor_Handle_Set dispatch_set_;
+    
+    /// Tracks handles that are waited for by <select>.
+    ACE_Select_Reactor_Handle_Set wait_set_;
+    
+    /// Tracks handles that are currently suspended.
+    ACE_Select_Reactor_Handle_Set suspend_set_;
+    
+    /// Track HANDLES we are interested in for various events that must
+    /// be dispatched *without* going through <select>.
+    ACE_Select_Reactor_Handle_Set ready_set_;
+    
+    /// Defined as a pointer to allow overriding by derived classes...
+    ACE_Timer_Queue *timer_queue_;
+    
+    /// Handle signals without requiring global/static variables.
+    ACE_Sig_Handler *signal_handler_;
+    
+    /// Callback object that unblocks the ACE_Select_Reactor if it's
+    /// sleeping.
+    ACE_Reactor_Notify *notify_handler_;
+    
+    /// Keeps track of whether we should delete the timer queue (if we
+    /// didn't create it, then we don't delete it).
+    bool delete_timer_queue_;
+    
+    /// Keeps track of whether we should delete the signal handler (if we
+    /// didn't create it, then we don't delete it).
+    bool delete_signal_handler_;
+    
+    /// Keeps track of whether we need to delete the notify handler (if
+    /// we didn't create it, then we don't delete it).
+    bool delete_notify_handler_;
+    
+    /// True if we've been initialized yet...
+    bool initialized_;
+    
+    /// Restart the <handle_events> event-loop method automatically when
+    /// <select> is interrupted via <EINTR>.
+    int restart_;
+    
+    /**
+     * Position that the main ACE_Select_Reactor thread is requeued in
+     * the list of waiters during a <notify> callback.  If this value ==
+     * -1 we are requeued at the end of the list.  Else if it's 0 then
+     * we are requeued at the front of the list.  Else if it's > 1 then
+     * that indicates the number of waiters to skip over.
+     */
+    int requeue_position_;
+    
+    /// The original thread that created this Select_Reactor.
+    ACE_thread_t owner_;
+    
+    /**
+     * True if state has changed during dispatching of
+     * <ACE_Event_Handlers>, else false.  This is used to determine
+     * whether we need to make another trip through the
+     * <Select_Reactor>'s <wait_for_multiple_events> loop.
+     */
+    bool state_changed_;
+    
+    /**
+     * If 0 then the Reactor will not mask the signals during the event
+     * dispatching.  This is useful for applications that do not
+     * register any signal handlers and want to reduce the overhead
+     * introduce by the kernel level locks required to change the mask.
+     */
+    bool mask_signals_;
+    
+    /// Controls/access whether the notify handler should renew the
+    /// Select_Reactor's token or not.
+    int supress_notify_renew (void);
+    void supress_notify_renew (int sr);
+
+private:
+
+    /// Determine whether we should renew Select_Reactor's token after handling
+    /// the notification message.
+    int supress_renew_;
+    
+    /// Deny access since member-wise won't work...
+    ACE_Select_Reactor_Impl (const ACE_Select_Reactor_Impl &);
+    ACE_Select_Reactor_Impl &operator = (const ACE_Select_Reactor_Impl &);
+};
+
+
+4. ACE_Reactor_Impl definition
+
+//file: ace/Reactor_Impl.h
+
+/**
+ * @class ACE_Reactor_Impl
+ *
+ * @brief An abstract class for implementing the Reactor Pattern.
+ */
+class ACE_Export ACE_Reactor_Impl
+{
+public:
+    /// Close down and release all resources.
+    virtual ~ACE_Reactor_Impl (void);
+    
+    /// Initialization.
+    virtual int open (size_t size,
+                      int restart = 0,
+                      ACE_Sig_Handler * = 0,
+                      ACE_Timer_Queue * = 0,
+                      int disable_notify_pipe = 0,
+                      ACE_Reactor_Notify * = 0) = 0;
+    
+    /**
+     * Returns 0, if the size of the current message has been put in
+     * @a size Returns -1, if not.  ACE_HANDLE allows the reactor to
+     * check if the caller is valid.
+     */
+    virtual int current_info (ACE_HANDLE, size_t & /* size */) = 0;
+    
+    //...
+};
+
+
+5. ACE_Reactor_Token_T definition
+
+//file: ace/Reactor_Token_T.h
+
+/**
+ * @class ACE_Reactor_Token_T
+ *
+ * @internal For ACE internal use only.
+ *
+ * @brief Used as a synchronization mechanism to coordinate concurrent
+ * access to an ACE_Reactor_Impl object.
+ *
+ * This class is used to make access to a reactor's internals and
+ * demultiplexing mechanism thread-safe.  By default, the thread that
+ * runs the handle_events() loop holds the token, even when it is blocked
+ * in the demultiplexer.  Whenever another thread wants to access the
+ * reactor, such as via the register_handler(), remove_handler(), etc.
+ * methods, it must ask the token owner for temporary release of the token.
+ * To accomplish this, this class reimplements the ACE_Token::sleep_hook()
+ * method through which the owning thread can be notified to temporarily
+ * release the token if the current situation permits.
+ *
+ * The owner of the token is responsible for deciding which
+ * request for the token can be granted.  By using the
+ * ACE_Token::renew() method, the thread that releases the token
+ * temporarily can specify to get the token back right after the
+ * other thread has completed using the token.  Thus, there is a
+ * dedicated thread that owns the token by default.  This
+ * thread grants other threads access to the token by ensuring
+ * that whenever somebody else has finished using the token the
+ * original owner reclaims the token again, i.e., the owner has the
+ * chance to schedule other threads. The thread that most likely needs
+ * the token most of the time is the thread running the dispatch loop.
+ */
+template <class ACE_TOKEN_TYPE>
+class ACE_Reactor_Token_T : public ACE_TOKEN_TYPE
+{
+public:
+    ACE_Reactor_Token_T (ACE_Reactor_Impl &r,
+                         int s_queue = ACE_TOKEN_TYPE::FIFO);
+    ACE_Reactor_Token_T (int s_queue = ACE_TOKEN_TYPE::FIFO);
+    virtual ~ACE_Reactor_Token_T (void);
+    
+    /// Called just before a token waiter goes to sleep.
+    /// @see ACE_Token::sleep_hook
+    virtual void sleep_hook (void);
+    
+    /// Get the reactor implementation
+    ACE_Reactor_Impl &reactor (void);
+    
+    /// Set the reactor implementation
+    void reactor (ACE_Reactor_Impl &);
+    
+    /// Dump the state of an object.
+    virtual void dump (void) const;
+    
+    /// Declare the dynamic allocation hooks.
+    ACE_ALLOC_HOOK_DECLARE;
+
+private:
+    ACE_Reactor_Impl *reactor_;
+};
+
+
+6. ACE_SELECT_TOKEN definition
+
+//file: ace/Select_Reactor_T.h
+
+#if defined (ACE_MT_SAFE) && (ACE_MT_SAFE != 0)
+typedef ACE_Token ACE_SELECT_TOKEN;
+#else
+typedef ACE_Noop_Token ACE_SELECT_TOKEN;
+#endif /* ACE_MT_SAFE && ACE_MT_SAFE != 0 */
+
+
+7. ACE_Token definition
+
+//file: ace/Token.h
+
+/**
+ * @class ACE_Token
+ *
+ * @brief Class that acquires, renews, and releases a synchronization
+ * token that is serviced in strict FIFO/LIFO ordering and that also
+ * supports (1) recursion and (2) readers/writer semantics.
+ *
+ * This class is a more general-purpose synchronization mechanism
+ * than many native OS mutexes.  For example, it implements
+ * "recursive mutex" semantics, where a thread that owns the token
+ * can reacquire it without deadlocking.  If the same thread calls
+ * <acquire> multiple times, however, it must call <release> an
+ * equal number of times before the token is actually released.
+ * Threads that are blocked awaiting the token are serviced in
+ * strict FIFO/LIFO order as other threads release the token (Solaris
+ * and Pthread mutexes don't strictly enforce an acquisition
+ * order).  There are two lists within the class.  Write
+ * acquires always have higher priority over read acquires.  Which
+ * means, if you use both write/read operations, care must be
+ * taken to avoid starvation on the readers.  Notice that the
+ * read/write acquire operations do not have the usual semantic of
+ * reader/writer locks.  Only one reader can acquire the token at
+ * a time (which is different from the usual reader/writer locks
+ * where several readers can acquire a lock at the same time as
+ * long as there is no writer waiting for the lock).  We choose
+ * the names to (1) borrow the semantic to give writers higher
+ * priority and (2) support a common interface for all locking
+ * classes in ACE.
+ */
+class ACE_Export ACE_Token
+{
+public:
+    //...
+
+private:
+    //...
+    
+    struct ACE_Token_Queue
+    {
+      /// Constructor
+      ACE_Token_Queue (void);
+    
+      /// Remove a waiter from the queue.
+      void remove_entry (ACE_Token_Queue_Entry *);
+    
+      /// Insert a waiter into the queue.
+      void insert_entry (ACE_Token_Queue_Entry &entry,
+                         int requeue_position = -1);
+    
+      /// Head of the list of waiting threads.
+      ACE_Token_Queue_Entry *head_;
+    
+      /// Tail of the list of waiting threads.
+      ACE_Token_Queue_Entry *tail_;
+    };
+    
+    //...
+
+    /// A queue of writer threads.
+    ACE_Token_Queue writers_;
+    
+    /// A queue of reader threads.
+    ACE_Token_Queue readers_;
+    
+    /// ACE_Thread_Mutex used to lock internal data structures.
+    ACE_Thread_Mutex lock_;
+    
+    /// Current owner of the token.
+    ACE_thread_t owner_;
+    
+    /// Some thread (i.e., <owner_>) is using the token.  We need this
+    /// extra variable to deal with POSIX pthreads madness...
+    int in_use_;
+    
+    /// Number of waiters.
+    int waiters_;
+    
+    /// Current nesting level.
+    int nesting_level_;
+    
+    /// The attributes for the condition variables, optimizes lock time.
+    ACE_Condition_Attributes attributes_;
+    
+    /// Queueing strategy, LIFO/FIFO.
+    int queueing_strategy_;
+};
+
+
+8. ACE_Thread_Mutex definition
+
+//file: ace/Thread_Mutex.h
+
+/**
+ * @class ACE_Thread_Mutex
+ *
+ * @brief ACE_Thread_Mutex wrapper (only valid for threads in the same
+ * process).
+ *
+ * This implementation is optimized for locking threads that are
+ * in the same process.  It maps to <CRITICAL_SECTION>s on NT
+ * and <ACE_mutex_t> with <type> set to <USYNC_THREAD> on UNIX.
+ * ACE_Thread_Mutex is recursive on some platforms (like
+ * Win32). However, on most platforms (like Solaris) it is not
+ * recursive.  To be totally safe and portable, developers
+ * should use ACE_Recursive_Thread_Mutex when they need a
+ * recursive mutex.
+ */
+class ACE_Export ACE_Thread_Mutex
+{
+  friend class ACE_Condition_Thread_Mutex;
+public:
+  /// Constructor.
+  ACE_Thread_Mutex (const ACE_TCHAR *name = 0,
+                    ACE_mutexattr_t *attributes = 0);
+
+  /// Implicitly destroy the mutex.
+  ~ACE_Thread_Mutex (void);
+
+  //...
+
+  // protected:
+  /// Mutex type that supports single-process locking efficiently.
+  ACE_thread_mutex_t lock_;
+
+  /// Keeps track of whether remove() has been called yet to avoid
+  /// multiple <remove> calls, e.g., explicitly and implicitly in the
+  /// destructor.  This flag isn't protected by a lock, so make sure
+  /// that you don't have multiple threads simultaneously calling
+  /// <remove> on the same object, which is a bad idea anyway...
+  bool removed_;
+
+private:
+  // = Prevent assignment and initialization.
+  void operator= (const ACE_Thread_Mutex &);
+  ACE_Thread_Mutex (const ACE_Thread_Mutex &);
+};
+
+
+9. ACE_thread_mutex_t definition
+
+//file: /ACE_wrappers/ace/os_include/os_pthread.h
+
+typedef pthread_t ACE_thread_t;
+
+#  if !defined (ACE_LACKS_COND_T)
+     typedef pthread_mutex_t ACE_mutex_t;
+     typedef pthread_cond_t ACE_cond_t;
+     typedef pthread_condattr_t ACE_condattr_t;
+     typedef pthread_mutexattr_t ACE_mutexattr_t;
+#  endif /* ! ACE_LACKS_COND_T */
+   typedef pthread_mutex_t ACE_thread_mutex_t;
+
+
+10. pthread_mutex_t definition
+
+//file: /glibc/nptl/sysdeps/unix/sysv/linux/i386/bits/pthreadtypes.h
+
+#define __SIZEOF_PTHREAD_MUTEX_T 24
+#define __SIZEOF_PTHREAD_MUTEXATTR_T 4
+
+typedef struct __pthread_internal_slist
+{
+    struct __pthread_internal_slist *__next;
+}__pthread_slist_t;
+
+
+/* Data structures for mutex handling.  The structure of the attribute
+   type is not exposed on purpose.  */
+typedef union
+{
+    struct __pthread_mutex_s
+    {
+        int __lock;
+        unsigned int __count;
+        int __owner;
+        /* KIND must stay at this position in the structure to maintain
+           binary compatibility.  */
+        int __kind;
+        unsigned int __nusers;
+        __extension__ union
+        {
+          int __spins;
+          __pthread_slist_t __list;
+        };
+    } __data;
+    char __size[__SIZEOF_PTHREAD_MUTEX_T];
+    long int __align;
+}pthread_mutex_t;
+
+typedef union
+{
+    char __size[__SIZEOF_PTHREAD_MUTEXATTR_T];
+    long int __align;
+}pthread_mutexattr_t;
+
+
+11. ACE_Lock_Adapter definition
+
+//file: ace/Lock_Adapter_T.h
+
+/**
+ * @class ACE_Lock_Adapter
+ *
+ * @brief This is an adapter that allows applications to transparently
+ * combine the <ACE_Lock> abstract base class (which contains
+ * pure virtual methods) with any of the other concrete ACE
+ * synchronization classes (e.g., ACE_Mutex, ACE_Semaphore,
+ * ACE_RW_Mutex, etc.).
+ *
+ * This class uses a form of the Adapter pattern.
+ */
+template <class ACE_LOCKING_MECHANISM>
+class ACE_Lock_Adapter : public ACE_Lock
+{
+public:
+    typedef ACE_LOCKING_MECHANISM ACE_LOCK;
+    
+    ...
+
+private:
+    /// The concrete locking mechanism that all the methods delegate to.
+    ACE_LOCKING_MECHANISM *lock_;
+    
+    /// This flag keep track of whether we are responsible for deleting
+    /// the lock
+    bool delete_lock_;
+};
+
+
+12. sig_atomic_t definition
+
+//file: ace/os_include/os_signal.h
+
+#if !defined (ACE_HAS_SIG_ATOMIC_T)
+   typedef int sig_atomic_t;
+#endif /* !ACE_HAS_SIG_ATOMIC_T */

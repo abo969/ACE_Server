@@ -1,0 +1,106 @@
+root@yu29:/mnt/hgfs/programming/win32/Server# netstat -anp | grep udp
+udp        0      0 0.0.0.0:44714           0.0.0.0:*                           822/avahi-daemon: r
+udp        0      0 0.0.0.0:68              0.0.0.0:*                           1004/dhclient   
+udp        0      0 0.0.0.0:5353            0.0.0.0:*                           822/avahi-daemon: r
+udp      288      0 0.0.0.0:6540            0.0.0.0:*                           8806/server7d   
+udp        0      0 0.0.0.0:1812            0.0.0.0:*                           1516/freeradius 
+udp        0      0 0.0.0.0:1813            0.0.0.0:*                           1516/freeradius 
+udp        0      0 0.0.0.0:46230           0.0.0.0:*                           8815/client     
+udp        0      0 0.0.0.0:1814            0.0.0.0:*                           1516/freeradius 
+root@yu29:/mnt/hgfs/programming/win32/Server# gdb 
+GNU gdb (GDB) 7.0-ubuntu
+Copyright (C) 2009 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "i486-linux-gnu".
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+(gdb) attach 8806
+Attaching to process 8806
+Reading symbols from /mnt/hgfs/programming/win32/Server/server7d...done.
+Reading symbols from /usr/local/lib/libACE-5.6.4.so...done.
+Loaded symbols for /usr/local/lib/libACE-5.6.4.so
+Reading symbols from /lib/tls/i686/cmov/libpthread.so.0...(no debugging symbols found)...done.
+[Thread debugging using libthread_db enabled]
+[New Thread 0xb76fbb70 (LWP 8809)]
+Loaded symbols for /lib/tls/i686/cmov/libpthread.so.0
+Reading symbols from /usr/lib/libstdc++.so.6...(no debugging symbols found)...done.
+Loaded symbols for /usr/lib/libstdc++.so.6
+Reading symbols from /lib/tls/i686/cmov/libm.so.6...(no debugging symbols found)...done.
+Loaded symbols for /lib/tls/i686/cmov/libm.so.6
+Reading symbols from /lib/libgcc_s.so.1...(no debugging symbols found)...done.
+Loaded symbols for /lib/libgcc_s.so.1
+Reading symbols from /lib/tls/i686/cmov/libc.so.6...(no debugging symbols found)...done.
+Loaded symbols for /lib/tls/i686/cmov/libc.so.6
+Reading symbols from /lib/tls/i686/cmov/libdl.so.2...(no debugging symbols found)...done.
+Loaded symbols for /lib/tls/i686/cmov/libdl.so.2
+Reading symbols from /lib/ld-linux.so.2...(no debugging symbols found)...done.
+Loaded symbols for /lib/ld-linux.so.2
+Reading symbols from /lib/tls/i686/cmov/libnss_files.so.2...(no debugging symbols found)...done.
+Loaded symbols for /lib/tls/i686/cmov/libnss_files.so.2
+0x005e6422 in __kernel_vsyscall ()
+(gdb) bt
+#0  0x005e6422 in __kernel_vsyscall ()
+#1  0x007d6e15 in pthread_cond_wait@@GLIBC_2.3.2 () from /lib/tls/i686/cmov/libpthread.so.0
+#2  0x00d8a814 in cond_timedwait (this=0xfffffe00, mutex=..., abstime=0x0) at ../../ace/OS_NS_Thread.inl:357
+#3  ACE_Condition_Thread_Mutex::wait (this=0xfffffe00, mutex=..., abstime=0x0) at ../../ace/Condition_Thread_Mutex.cpp:100
+#4  0x00d8a87b in ACE_Condition_Thread_Mutex::wait (this=0x963e7b0, abstime=0x0) at ../../ace/Condition_Thread_Mutex.cpp:107
+#5  0x00e1160a in ACE_Thread_Manager::wait (this=0x963e768, timeout=0x0, abandon_detached_threads=false, use_absolute_time=true)
+    at ../../ace/Thread_Manager.cpp:1638
+#6  0x08054126 in start_task () at server7.cpp:220
+#7  0x08054212 in main (argc=1, argv=0xbf822684) at server7.cpp:236
+(gdb) q
+A debugging session is active.
+
+        Inferior 1 [process 8806] will be detached.
+
+Quit anyway? (y or n) y
+Detaching from program: /mnt/hgfs/programming/win32/Server/server7d, process 8806
+root@yu29:/mnt/hgfs/programming/win32/Server# gdb
+GNU gdb (GDB) 7.0-ubuntu
+Copyright (C) 2009 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "i486-linux-gnu".
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+(gdb) attach 8815
+Attaching to process 8815
+Reading symbols from /mnt/hgfs/programming/win32/Server/client...done.
+Reading symbols from /usr/local/lib/libACE-5.6.4.so...done.
+Loaded symbols for /usr/local/lib/libACE-5.6.4.so
+Reading symbols from /lib/tls/i686/cmov/libpthread.so.0...(no debugging symbols found)...done.
+[Thread debugging using libthread_db enabled]
+Loaded symbols for /lib/tls/i686/cmov/libpthread.so.0
+Reading symbols from /usr/lib/libstdc++.so.6...(no debugging symbols found)...done.
+Loaded symbols for /usr/lib/libstdc++.so.6
+Reading symbols from /lib/tls/i686/cmov/libm.so.6...(no debugging symbols found)...done.
+Loaded symbols for /lib/tls/i686/cmov/libm.so.6
+Reading symbols from /lib/libgcc_s.so.1...(no debugging symbols found)...done.
+Loaded symbols for /lib/libgcc_s.so.1
+Reading symbols from /lib/tls/i686/cmov/libc.so.6...(no debugging symbols found)...done.
+Loaded symbols for /lib/tls/i686/cmov/libc.so.6
+Reading symbols from /lib/tls/i686/cmov/libdl.so.2...(no debugging symbols found)...done.
+Loaded symbols for /lib/tls/i686/cmov/libdl.so.2
+Reading symbols from /lib/ld-linux.so.2...(no debugging symbols found)...done.
+Loaded symbols for /lib/ld-linux.so.2
+0x00bf6422 in __kernel_vsyscall ()
+(gdb) bt
+#0  0x00bf6422 in __kernel_vsyscall ()
+#1  0x00442ff1 in recvfrom () from /lib/tls/i686/cmov/libpthread.so.0
+#2  0x08048cf0 in ACE_OS::recvfrom (handle=7, buf=0xbf91451c "", len=100, flags=0, addr=0xbf91460c, addrlen=0xbf9144b8)
+    at /usr/local/include/ace/OS_NS_sys_socket.inl:399
+#3  0x08048e16 in ACE_SOCK_Dgram::recv (this=0xbf914518, buf=0xbf91451c, n=100, addr=..., flags=0)
+    at /usr/local/include/ace/SOCK_Dgram.inl:61
+#4  0x08048b5d in main (argc=1, argv=0xbf9146e4) at client.cpp:41
+(gdb) q
+A debugging session is active.
+
+        Inferior 1 [process 8815] will be detached.
+
+Quit anyway? (y or n) y
+Detaching from program: /mnt/hgfs/programming/win32/Server/client, process 8815

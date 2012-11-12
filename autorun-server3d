@@ -1,0 +1,14 @@
+#! /usr/bin/expect -f
+
+package require Thread 
+set t [thread::create]  ;# Create a thread 
+
+spawn ./server3d
+expect -exact "main::start"
+expect -exact "in Handler()"
+
+thread::send $t {exec ./autorun-client}
+
+expect -exact "exit MyTask::svc()"
+expect -exact "main::end"
+send -- "q\r"

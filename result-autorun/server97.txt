@@ -1,0 +1,97 @@
+spawn ./server97
+---------------------------------------------
+input command to test the program
+ s or S : start the talker (ACE Task)
+ q or Q : quit
+---------------------------------------------
+(3079153360) in MyTask:: MyTask()
+$ input command >s
+(3079153360) in MyTask::open
+(3079150448) enter MyTask::svc()
+
+(3079150448) in Handler()
+
+(3079150448) MyTask2 start
+(3070757744) enter MyTask2::svc()
+
+(3070757744) MyTask2::svc() register exit handler
+(3079150448) handle_events() succeed, result = 1
+
+(3070757744) MyTask2::svc() remove exit handler
+
+(3079150448) handle_events() succeed, result = 1
+
+(3070757744) MyTask2::svc() register exit handler
+(3079150448) handle_events() succeed, result = 1
+
+(3070757744) MyTask2::svc() remove exit handler
+
+(3079150448) handle_events() succeed, result = 1
+
+(3070757744) exit MyTask2::svc()
+
+recv: No. = 1, host = localhost, IP = 7f000001, port = 58369, bytes = 21
+      data = a ACE_SOCK_Dgram test
+(3079150448) handle_events() succeed, result = 1
+
+recv: No. = 2, host = localhost, IP = 7f000001, port = 51936, bytes = 21
+      data = a ACE_SOCK_Dgram test
+(3079150448) handle_events() succeed, result = 1
+
+(3079150448) MyTask::svc() notify the exit handler
+(3079150448) handle_exception: handle the exit handler
+(3079150448) handle_events() succeed, result = 1
+
+(3079150448) exit MyTask::svc()
+
+(3079150448) in MyTask::close() 1
+(3079150448) in MyTask::close() 2
+(3079150448) in MyTask::close() 3
+(3079150448) in ~Handler()
+(3079150448) in MyTask::close() 4
+$ input command >s
+(3079153360) in MyTask::open
+(3079150448) enter MyTask::svc()
+
+(3079150448) in Handler()
+
+(3079150448) MyTask2 start
+(3070757744) enter MyTask2::svc()
+
+(3070757744) MyTask2::svc() register exit handler
+(3079150448) handle_events() succeed, result = 1
+
+(3070757744) MyTask2::svc() remove exit handler
+
+(3079150448) handle_events() succeed, result = 1
+
+(3070757744) MyTask2::svc() register exit handler
+(3079150448) handle_events() succeed, result = 1
+
+(3070757744) MyTask2::svc() remove exit handler
+
+(3079150448) handle_events() succeed, result = 1
+
+(3070757744) exit MyTask2::svc()
+
+recv: No. = 1, host = localhost, IP = 7f000001, port = 42381, bytes = 21
+      data = a ACE_SOCK_Dgram test
+(3079150448) handle_events() succeed, result = 1
+
+recv: No. = 2, host = localhost, IP = 7f000001, port = 36809, bytes = 21
+      data = a ACE_SOCK_Dgram test
+(3079150448) handle_events() succeed, result = 1
+
+(3079150448) MyTask::svc() notify the exit handler
+(3079150448) handle_exception: handle the exit handler
+(3079150448) handle_events() succeed, result = 1
+
+(3079150448) exit MyTask::svc()
+
+(3079150448) in MyTask::close() 1
+(3079150448) in MyTask::close() 2
+(3079150448) in MyTask::close() 3
+(3079150448) in ~Handler()
+(3079150448) in MyTask::close() 4
+$ input command >q
+(3079153360) in MyTask::~MyTask() 1

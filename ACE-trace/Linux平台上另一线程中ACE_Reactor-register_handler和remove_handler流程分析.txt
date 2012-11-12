@@ -1,0 +1,108 @@
+1. Linux平台，另一线程中ACE_Reactor::register_handler流程
+
+->ACE_Event_Handler::register_stdin_handler
+ ->ACE_Reactor::register_handler
+  ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::register_handler
+   ->ACE_Guard::ACE_Guard
+    ->ACE_Guard<ACE_Reactor_Token_T<ACE_Token> >::acquire
+	 ->ACE_Token::acquire
+	  ->ACE_Token::shared_acquire
+	   ->ACE_Reactor_Token_T<ACE_Token>::sleep_hook
+	    ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::notify
+		 ->ACE_Select_Reactor_Notify::notify
+		  ->ACE::send
+		   ->ACE::send_i
+		    ->ACE_OS::write
+			 ->::write
+
+从中可以看出，register_handler最终调用了ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::notify，且以缺省参数调用，即
+virtual int notify (ACE_Event_Handler * = 0, ACE_Reactor_Mask = ACE_Event_Handler::EXCEPT_MASK, ACE_Time_Value * = 0);
+其中ACE_Event_Handler::EXCEPT_MASK=4;
+
+  
+(gdb) bt
+#0  write (handle=6, buf=0xb77eb034, n=8, timeout=0x0) at ../../ace/OS_NS_unistd.inl:1167
+#1  send_i (handle=6, buf=0xb77eb034, n=8, timeout=0x0) at ../../ace/ACE.inl:226
+#2  ACE::send (handle=6, buf=0xb77eb034, n=8, timeout=0x0) at ../../ace/ACE.cpp:1275
+#3  0x00531b6d in ACE_Select_Reactor_Notify::notify (this=0x80735c0, event_handler=0x0, mask=4, timeout=0x0)
+    at ../../ace/Select_Reactor_Base.cpp:719
+#4  0x0805d666 in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::notify (this=0x8072ca0, eh=0x0, mask=4, timeout=0x0)
+    at /usr/local/include/ace/Select_Reactor_T.cpp:213
+#5  0x0805fbf3 in ACE_Reactor_Token_T<ACE_Token>::sleep_hook (this=0x8073370) at /usr/local/include/ace/Reactor_Token_T.cpp:64
+#6  0x00554d16 in ACE_Token::shared_acquire (this=0x8073370, sleep_hook_func=0, arg=0x0, timeout=0x0, op_type=ACE_Token::WRITE_TOKEN)
+    at ../../ace/Token.cpp:254
+#7  0x00554dec in ACE_Token::acquire (this=0x8073370, timeout=0x0) at ../../ace/Token.cpp:339
+#8  0x08057d21 in ACE_Guard<ACE_Reactor_Token_T<ACE_Token> >::acquire (this=0xb77eb1f4) at /usr/local/include/ace/Guard_T.inl:12
+#9  0x08057491 in ACE_Guard (this=0xb77eb1f4, l=...) at /usr/local/include/ace/Guard_T.inl:38
+#10 0x0805c140 in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::register_handler (this=0x8072ca0, handle=0, handler=0x8070774, 
+    mask=1) at /usr/local/include/ace/Select_Reactor_T.cpp:286
+#11 0x00522d22 in ACE_Reactor::register_handler (this=0x80745f8, io_handle=0, event_handler=0x8070774, mask=1) at ../../ace/Reactor.cpp:355
+#12 0x004e2254 in ACE_Event_Handler::register_stdin_handler (eh=0x8070774, reactor=0x80745f8, thr_mgr=0x8070920, flags=64)
+    at ../../ace/Event_Handler.cpp:283
+#13 0x08053a5f in MyTask2::svc (this=0x8070774) at server81.cpp:230
+#14 0x0054ab52 in ACE_Task_Base::svc_run (args=0x8070774) at ../../ace/Task.cpp:275
+#15 0x0054beed in ACE_Thread_Adapter::invoke_i (this=0x80756e0) at ../../ace/Thread_Adapter.cpp:149
+#16 0x0054bf65 in ACE_Thread_Adapter::invoke (this=0x80756e0) at ../../ace/Thread_Adapter.cpp:98
+#17 0x004c25c1 in ace_thread_adapter (args=0x80756e0) at ../../ace/Base_Thread_Adapter.cpp:124
+#18 0x00e4480e in start_thread () from /lib/tls/i686/cmov/libpthread.so.0
+#19 0x002667ee in clone () from /lib/tls/i686/cmov/libc.so.6
+
+整个过程的调用栈如下：
+
+->ACE_Event_Handler::register_stdin_handler
+ ->ACE_Reactor::register_handler
+  ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::register_handler
+   ->ACE_Guard::ACE_Guard
+    ->ACE_Guard<ACE_Reactor_Token_T<ACE_Token> >::acquire
+	 ->ACE_Token::acquire
+	  ->ACE_Token::shared_acquire
+	   ->ACE_Reactor_Token_T<ACE_Token>::sleep_hook
+	    ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::notify
+		 ->ACE_Select_Reactor_Notify::notify
+		  ->ACE::send
+		   ->ACE::send_i
+		    ->ACE_OS::write
+			 ->::write
+   ->ACE_Select_Reactor_T::register_handler_i
+    ->ACE_Select_Reactor_T::is_suspended_i
+	 ->ACE_Select_Reactor_Handler_Repository::find
+
+
+2. Linux平台，另一线程中ACE_Reactor::remove_handler流程
+
+->ACE_Reactor::remove_handler
+ ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::remove_handler
+  ->ACE_Guard::ACE_Guard
+   ->ACE_Guard<ACE_Reactor_Token_T<ACE_Token> >::acquire
+    ->ACE_Token::acquire
+	 ->ACE_Token::shared_acquire
+	  ->ACE_Reactor_Token_T<ACE_Token>::sleep_hook
+	   ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::notify
+	    ->ACE_Select_Reactor_Notify::notify
+		 ->ACE::send
+		  ->ACE::send_i
+		   ->ACE_OS::write
+			->::write
+
+(gdb) bt
+#0  ACE::send (handle=6, buf=0xb77eb064, n=8, timeout=0x0) at ../../ace/ACE.cpp:1288
+#1  0x00d91b6d in ACE_Select_Reactor_Notify::notify (this=0x80735c0, event_handler=0x0, mask=4, timeout=0x0)
+    at ../../ace/Select_Reactor_Base.cpp:719
+#2  0x0805d666 in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::notify (this=0x8072ca0, eh=0x0, mask=4, timeout=0x0)
+    at /usr/local/include/ace/Select_Reactor_T.cpp:213
+#3  0x0805fbf3 in ACE_Reactor_Token_T<ACE_Token>::sleep_hook (this=0x8073370) at /usr/local/include/ace/Reactor_Token_T.cpp:64
+#4  0x00db4d16 in ACE_Token::shared_acquire (this=0x8073370, sleep_hook_func=0, arg=0x0, timeout=0x0, op_type=ACE_Token::WRITE_TOKEN)
+    at ../../ace/Token.cpp:254
+#5  0x00db4dec in ACE_Token::acquire (this=0x8073370, timeout=0x0) at ../../ace/Token.cpp:339
+#6  0x08057d21 in ACE_Guard<ACE_Reactor_Token_T<ACE_Token> >::acquire (this=0xb77eb224) at /usr/local/include/ace/Guard_T.inl:12
+#7  0x08057491 in ACE_Guard (this=0xb77eb224, l=...) at /usr/local/include/ace/Guard_T.inl:38
+#8  0x0805c584 in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::remove_handler (this=0x8072ca0, handle=0, mask=1)
+    at /usr/local/include/ace/Select_Reactor_T.cpp:347
+#9  0x080554a5 in ACE_Reactor::remove_handler (this=0x80745f8, handle=0, mask=1) at /usr/local/include/ace/Reactor.inl:244
+#10 0x08053b4e in MyTask2::svc (this=0x8070774) at server81.cpp:241
+#11 0x00daab52 in ACE_Task_Base::svc_run (args=0x8070774) at ../../ace/Task.cpp:275
+#12 0x00dabeed in ACE_Thread_Adapter::invoke_i (this=0x80756e0) at ../../ace/Thread_Adapter.cpp:149
+#13 0x00dabf65 in ACE_Thread_Adapter::invoke (this=0x80756e0) at ../../ace/Thread_Adapter.cpp:98
+#14 0x00d225c1 in ace_thread_adapter (args=0x80756e0) at ../../ace/Base_Thread_Adapter.cpp:124
+#15 0x00e8680e in start_thread () from /lib/tls/i686/cmov/libpthread.so.0
+#16 0x001fb7ee in clone () from /lib/tls/i686/cmov/libc.so.6

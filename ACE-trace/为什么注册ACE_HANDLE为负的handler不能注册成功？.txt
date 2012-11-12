@@ -1,0 +1,180 @@
+为什么注册ACE_HANDLE为负的handler不能注册成功？
+
+
+1. the flow of handle validation
+
+->ACE_Reactor::register_handler
+ ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::register_handler
+  ->CE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::register_handler_i
+   ->ACE_Select_Reactor_Handler_Repository::bind
+    ->ACE_Select_Reactor_Handler_Repository::invalid_handle
+
+
+2. invalidatin function
+
+//file: ace/Select_Reactor_Base.cpp
+
+bool
+ACE_Select_Reactor_Handler_Repository::invalid_handle (ACE_HANDLE handle)
+{
+  ACE_TRACE ("ACE_Select_Reactor_Handler_Repository::invalid_handle");
+#if defined (ACE_WIN32)
+  // It's too expensive to perform more exhaustive validity checks on
+  // Win32 due to the way that they implement SOCKET HANDLEs.
+  if (handle == ACE_INVALID_HANDLE)
+#else /* !ACE_WIN32 */
+  if (handle < 0
+      || static_cast<size_type> (handle) >= this->event_handlers_.size ())
+#endif /* ACE_WIN32 */
+    {
+      errno = EINVAL;
+      return true;
+    }
+
+  return false;
+}
+
+在该函数中，会判断handle的合法性，合法的handle的范围是0~1023，共计1024个。
+
+
+3. debug analysis
+
+# gdb ./server99
+GNU gdb (GDB) 7.0-ubuntu
+Copyright (C) 2009 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "i486-linux-gnu".
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>...
+Reading symbols from /mnt/hgfs/programming/win32/Server/server99...done.
+(gdb) b MyTask2::svc() 
+Breakpoint 1 at 0x80539e1: file server99.cpp, line 225.
+(gdb) r
+Starting program: /mnt/hgfs/programming/win32/Server/server99 
+[Thread debugging using libthread_db enabled]
+---------------------------------------------
+input command to test the program
+ s or S : start the talker (ACE Task)
+ q or Q : quit
+---------------------------------------------
+$ input command >s
+(3086931664) main::start
+(3086931664) MyTask start
+[New Thread 0xb7fecb70 (LWP 4179)]
+(3086928752) enter MyTask::svc()
+
+(3086928752) in Handler()
+
+(3086928752) MyTask2 start
+[New Thread 0xb77ebb70 (LWP 4180)]
+[Switching to Thread 0xb77ebb70 (LWP 4180)]
+
+Breakpoint 1, MyTask2::svc (this=0x80705c4) at server99.cpp:225
+225         ACE_DEBUG ((LM_INFO, ACE_TEXT ("(%t) enter MyTask2::svc()\n\n")));
+(gdb) b ACE_Select_Reactor_Handler_Repository::invalid_handle
+Breakpoint 2 at 0xc597d5: file ../../ace/Select_Reactor_Base.cpp, line 50.
+(gdb) c
+Continuing.
+(3078536048) enter MyTask2::svc()
+
+(3078536048) MyTask2::svc() register exit handler
+
+Breakpoint 2, ACE_Select_Reactor_Handler_Repository::invalid_handle (this=0x806dbac, handle=1023) at ../../ace/Select_Reactor_Base.cpp:50
+50        if (handle < 0
+(gdb) l Select_Reactor_Base.cpp:41,59
+41      bool
+42      ACE_Select_Reactor_Handler_Repository::invalid_handle (ACE_HANDLE handle)
+43      {
+44        ACE_TRACE ("ACE_Select_Reactor_Handler_Repository::invalid_handle");
+45      #if defined (ACE_WIN32)
+46        // It's too expensive to perform more exhaustive validity checks on
+47        // Win32 due to the way that they implement SOCKET HANDLEs.
+48        if (handle == ACE_INVALID_HANDLE)
+49      #else /* !ACE_WIN32 */
+50        if (handle < 0
+51            || static_cast<size_type> (handle) >= this->event_handlers_.size ())
+52      #endif /* ACE_WIN32 */
+53          {
+54            errno = EINVAL;
+55            return true;
+56          }
+57
+58        return false;
+59      }
+(gdb) p handle
+$1 = 1023
+(gdb) p this->event_handlers_.size()
+$2 = 1024
+(gdb) n
+59      }
+(gdb) bt
+#0  ACE_Select_Reactor_Handler_Repository::invalid_handle (this=0x806dbac, handle=1023) at ../../ace/Select_Reactor_Base.cpp:59
+#1  0x00c59868 in ACE_Select_Reactor_Handler_Repository::bind (this=0x806dbac, handle=1023, event_handler=0xb7fec264, mask=4)
+    at ../../ace/Select_Reactor_Base.cpp:205
+#2  0x0805bc8f in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::register_handler_i (this=0x806dba8, handle=1023, 
+    event_handler=0xb7fec264, mask=4) at /usr/local/include/ace/Select_Reactor_T.cpp:996
+#3  0x0805a616 in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::register_handler (this=0x806dba8, handle=1023, handler=0xb7fec264, 
+    mask=4) at /usr/local/include/ace/Select_Reactor_T.cpp:287
+#4  0x00c4ad22 in ACE_Reactor::register_handler (this=0x806f500, io_handle=1023, event_handler=0xb7fec264, mask=4)
+    at ../../ace/Reactor.cpp:355
+#5  0x08053ac0 in MyTask2::svc (this=0x80705c4) at server99.cpp:230
+#6  0x00c72b52 in ACE_Task_Base::svc_run (args=0x80705c4) at ../../ace/Task.cpp:275
+#7  0x00c73eed in ACE_Thread_Adapter::invoke_i (this=0x80706e0) at ../../ace/Thread_Adapter.cpp:149
+#8  0x00c73f65 in ACE_Thread_Adapter::invoke (this=0x80706e0) at ../../ace/Thread_Adapter.cpp:98
+#9  0x00bea5c1 in ace_thread_adapter (args=0x80706e0) at ../../ace/Base_Thread_Adapter.cpp:124
+#10 0x005f980e in start_thread () from /lib/tls/i686/cmov/libpthread.so.0
+#11 0x001dc7ee in clone () from /lib/tls/i686/cmov/libc.so.6
+(gdb) info breakpoints 
+Num     Type           Disp Enb Address    What
+1       breakpoint     keep y   0x080539e1 in MyTask2::svc() at server99.cpp:225
+        breakpoint already hit 1 time
+2       breakpoint     keep y   0x00c597d5 in ACE_Select_Reactor_Handler_Repository::invalid_handle(int)
+                                       at ../../ace/Select_Reactor_Base.cpp:50
+        breakpoint already hit 1 time
+(gdb) delete breakpoints 2
+(gdb) c
+Continuing.
+(3086928752) handle_events() succeed, result = 1
+
+(3078536048) MyTask2::svc() remove exit handler
+
+(3086928752) handle_events() succeed, result = 1
+
+(3078536048) MyTask2::svc() register exit handler
+(3086928752) handle_events() succeed, result = 1
+
+(3078536048) MyTask2::svc() remove exit handler
+
+(3086928752) handle_events() succeed, result = 1
+
+(3078536048) exit MyTask2::svc()
+
+[Thread 0xb77ebb70 (LWP 4180) exited]
+recv: No. = 1, host = localhost, IP = 7f000001, port = 41724, bytes = 21
+      data = a ACE_SOCK_Dgram test
+(3086928752) handle_events() succeed, result = 1
+
+recv: No. = 2, host = localhost, IP = 7f000001, port = 50406, bytes = 21
+      data = a ACE_SOCK_Dgram test
+(3086928752) handle_events() succeed, result = 1
+
+(3086928752) MyTask::svc() notify the exit handler
+(3086928752) handle_exception: handle the exit handler
+(3086928752) handle_events() succeed, result = 1
+
+(3086928752) MyTask::svc() notify the exit handler
+(3086928752) exit MyTask::svc()
+
+(3086928752) in ~Handler()
+
+(3086931664) main::end
+
+$ input command >[Thread 0xb7fecb70 (LWP 4179) exited]
+q
+
+Program exited normally.
+(gdb) q
+ 

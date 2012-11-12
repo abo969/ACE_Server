@@ -1,0 +1,9 @@
+# tclsh
+% ./test.sh
+-e start to run all servers
+
+server1 running ...
+-e     result is in test.txt
+
+done. bye.
+% exit

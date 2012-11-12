@@ -1,0 +1,112 @@
+spawn ./server2d
+---------------------------------------------
+input command to test the program
+ s or S : start the talker (ACE Task)
+ q or Q : quit
+---------------------------------------------
+$ input command >s
+(3078665936) main::start
+(3078665936) calling ACE_Singleton<TYPE, ACE_LOCK>::instance in file `/usr/local/include/ace/Singleton.cpp' on line 59
+   (3078665936) calling ACE_Task<ACE_SYNCH_USE>::ACE_Task in file `/usr/local/include/ace/Task_T.cpp' on line 55
+      (3078665936) calling ACE_Message_Queue<ACE_SYNCH_USE>::ACE_Message_Queue in file `/usr/local/include/ace/Message_Queue_T.cpp' on line 930
+         (3078665936) calling ACE_Message_Queue<ACE_SYNCH_USE>::open in file `/usr/local/include/ace/Message_Queue_T.cpp' on line 986
+         (3078665936) leaving ACE_Message_Queue<ACE_SYNCH_USE>::open
+      (3078665936) leaving ACE_Message_Queue<ACE_SYNCH_USE>::ACE_Message_Queue
+   (3078665936) leaving ACE_Task<ACE_SYNCH_USE>::ACE_Task
+(3078665936) leaving ACE_Singleton<TYPE, ACE_LOCK>::instance
+(3078665936) MyTask start
+(3078663024) enter MyTask::svc()
+
+(3078663024) calling ACE_SOCK_Dgram::ACE_SOCK_Dgram in file `/usr/local/include/ace/SOCK_Dgram.inl' on line 16
+(3078663024) leaving ACE_SOCK_Dgram::ACE_SOCK_Dgram
+(3078663024) in Handler()
+
+(3078663024) calling ACE_SOCK_Dgram::~ACE_SOCK_Dgram in file `/usr/local/include/ace/SOCK_Dgram.inl' on line 22
+(3078663024) leaving ACE_SOCK_Dgram::~ACE_SOCK_Dgram
+(3078663024) calling ACE_IPC_SAP::get_handle in file `/usr/local/include/ace/IPC_SAP.inl' on line 18
+(3078663024) leaving ACE_IPC_SAP::get_handle
+(3078663024) calling ACE_SOCK_Dgram::recv in file `/usr/local/include/ace/SOCK_Dgram.inl' on line 52
+   (3078663024) calling ACE_IPC_SAP::get_handle in file `/usr/local/include/ace/IPC_SAP.inl' on line 18
+   (3078663024) leaving ACE_IPC_SAP::get_handle
+(3078663024) leaving ACE_SOCK_Dgram::recv
+(3078663024) calling ACE_INET_Addr::get_port_number in file `/usr/local/include/ace/INET_Addr.inl' on line 90
+(3078663024) leaving ACE_INET_Addr::get_port_number
+recv: No. = 1, host = localhost, IP = 7f000001, port = 50151, bytes = 21
+      data = a ACE_SOCK_Dgram test
+(3078663024) calling ACE_SOCK_Dgram::send in file `/usr/local/include/ace/SOCK_Dgram.inl' on line 33
+   (3078663024) calling ACE_IPC_SAP::get_handle in file `/usr/local/include/ace/IPC_SAP.inl' on line 18
+   (3078663024) leaving ACE_IPC_SAP::get_handle
+(3078663024) leaving ACE_SOCK_Dgram::send
+(3078663024) handle_events(10) succeed, result = 1
+
+(3078663024) calling ACE_SOCK_Dgram::recv in file `/usr/local/include/ace/SOCK_Dgram.inl' on line 52
+   (3078663024) calling ACE_IPC_SAP::get_handle in file `/usr/local/include/ace/IPC_SAP.inl' on line 18
+   (3078663024) leaving ACE_IPC_SAP::get_handle
+(3078663024) leaving ACE_SOCK_Dgram::recv
+(3078663024) calling ACE_INET_Addr::get_port_number in file `/usr/local/include/ace/INET_Addr.inl' on line 90
+(3078663024) leaving ACE_INET_Addr::get_port_number
+recv: No. = 2, host = localhost, IP = 7f000001, port = 60841, bytes = 21
+      data = a ACE_SOCK_Dgram test
+(3078663024) calling ACE_SOCK_Dgram::send in file `/usr/local/include/ace/SOCK_Dgram.inl' on line 33
+   (3078663024) calling ACE_IPC_SAP::get_handle in file `/usr/local/include/ace/IPC_SAP.inl' on line 18
+   (3078663024) leaving ACE_IPC_SAP::get_handle
+(3078663024) leaving ACE_SOCK_Dgram::send
+(3078663024) handle_events(10) succeed, result = 1
+
+(3078663024) handle_events(10) timeout, result = 0
+
+(3078663024) calling ACE_Singleton<TYPE, ACE_LOCK>::instance in file `/usr/local/include/ace/Singleton.cpp' on line 59
+   (3078663024) calling ACE_Task<ACE_SYNCH_USE>::ACE_Task in file `/usr/local/include/ace/Task_T.cpp' on line 55
+      (3078663024) calling ACE_Message_Queue<ACE_SYNCH_USE>::ACE_Message_Queue in file `/usr/local/include/ace/Message_Queue_T.cpp' on line 930
+         (3078663024) calling ACE_Message_Queue<ACE_SYNCH_USE>::open in file `/usr/local/include/ace/Message_Queue_T.cpp' on line 986
+         (3078663024) leaving ACE_Message_Queue<ACE_SYNCH_USE>::open
+      (3078663024) leaving ACE_Message_Queue<ACE_SYNCH_USE>::ACE_Message_Queue
+   (3078663024) leaving ACE_Task<ACE_SYNCH_USE>::ACE_Task
+(3078663024) leaving ACE_Singleton<TYPE, ACE_LOCK>::instance
+(3078663024) MyTask2 start
+(3070270320) enter MyTask2::svc()
+
+(3070270320) MyTask2::svc() register ACE_STDIN handler
+(3078663024) handle_events(10) succeed, result = 1
+
+(3070270320) MyTask2::svc() remove ACE_STDIN handler
+
+(3078663024) handle_events(10) succeed, result = 1
+
+(3070270320) MyTask2::svc() register ACE_STDIN handler
+(3078663024) handle_events(10) succeed, result = 1
+
+(3070270320) MyTask2::svc() remove ACE_STDIN handler
+
+(3078663024) handle_events(10) succeed, result = 1
+
+(3070270320) exit MyTask2::svc()
+
+(3078663024) handle_events(10) timeout, result = 0
+
+(3078663024) calling ACE_Singleton<TYPE, ACE_LOCK>::instance in file `/usr/local/include/ace/Singleton.cpp' on line 59
+(3078663024) leaving ACE_Singleton<TYPE, ACE_LOCK>::instance
+(3078663024) MyTask2 start
+(3061877616) enter MyTask2::svc()
+
+(3061877616) MyTask2::svc() register ACE_STDIN handler
+(3078663024) handle_events(10) succeed, result = 1
+
+(3078663024) calling ACE_IPC_SAP::get_handle in file `/usr/local/include/ace/IPC_SAP.inl' on line 18
+(3078663024) leaving ACE_IPC_SAP::get_handle
+(3078663024) exit MyTask::svc()
+
+(3078663024) in ~Handler()
+
+(3078663024) calling ACE_SOCK_Dgram::~ACE_SOCK_Dgram in file `/usr/local/include/ace/SOCK_Dgram.inl' on line 22
+(3078663024) leaving ACE_SOCK_Dgram::~ACE_SOCK_Dgram
+(3061877616) MyTask2::svc() remove ACE_STDIN handler
+
+(3061877616) MyTask2::svc() register ACE_STDIN handler
+(3061877616) MyTask2::svc() remove ACE_STDIN handler
+
+(3061877616) exit MyTask2::svc()
+
+(3078665936) main::end
+
+$ input command >

@@ -1,0 +1,447 @@
+wakeup of select analysis
+
+
+1. the flow of sys_select
+
+    ->sys_select
+     ->do_select
+      ->poll_initwait
+       ->init_poll_funcptr
+      ->poll<--   //for each fd, here, poll is only a function pointer
+      |      |
+      |------|
+      ->schedule_timeout  //if timeout does not expire, and no signal, it will sleep
+      ->poll_freewait
+
+
+    //file: fs/select.c
+    void poll_initwait(struct poll_wqueues *pwq)
+    {
+    	init_poll_funcptr(&pwq->pt, __pollwait);  //__pollwait is a function pointer
+    	pwq->error = 0;
+    	pwq->table = NULL;
+    }
+
+    //file: include/linux/poll.h
+    static inline void init_poll_funcptr(poll_table *pt, poll_queue_proc qproc)
+    {
+    	pt->qproc = qproc;  //in fact, pt->qproc is __pollwait
+    }
+
+
+2. poll analysis
+
+    in do_select, it will call poll of each fd for each fd_set. take tty as an example, it will call normal_poll, that is, poll method for N_TTY. it is a hook registered in console_init.
+
+    ->start_kernel
+     ->console_init
+      ->tty_register_ldisc
+    
+
+    //file: drivers/char/tty_io.c
+
+    /*
+     * Initialize the console device. This is called *early*, so
+     * we can't necessarily depend on lots of kernel help here.
+     * Just do some early initializations, and do the complex setup
+     * later.
+     */
+    void __init console_init(void)
+    {
+    	initcall_t *call;
+    
+    	/* Setup the default TTY line discipline. */
+    	(void) tty_register_ldisc(N_TTY, &tty_ldisc_N_TTY);
+    
+      //...
+    }
+
+
+    //file: include/asm-i386/termios.h
+
+    /* line disciplines */
+    #define N_TTY		  0
+    #define N_SLIP		1
+    #define N_MOUSE		2
+
+
+    //file: drivers/char/n_tty.c
+
+    struct tty_ldisc tty_ldisc_N_TTY = {
+    	TTY_LDISC_MAGIC,	/* magic */
+    	"n_tty",		/* name */
+    	0,			/* num */
+    	0,			/* flags */
+    	n_tty_open,		/* open */
+    	n_tty_close,		/* close */
+    	n_tty_flush_buffer,	/* flush_buffer */
+    	n_tty_chars_in_buffer,	/* chars_in_buffer */
+    	read_chan,		/* read */
+    	write_chan,		/* write */
+    	n_tty_ioctl,		/* ioctl */
+    	n_tty_set_termios,	/* set_termios */
+    	normal_poll,		/* poll */
+    	NULL,			/* hangup */
+    	n_tty_receive_buf,	/* receive_buf */
+    	n_tty_receive_room,	/* receive_room */
+    	n_tty_write_wakeup	/* write_wakeup */
+    };
+
+
+    //file: drivers/char/n_tty.c
+    
+    /**
+     *	normal_poll		-	poll method for N_TTY
+     *	@tty: terminal device
+     *	@file: file accessing it
+     *	@wait: poll table
+     *
+     *	Called when the line discipline is asked to poll() for data or
+     *	for special events. This code is not serialized with respect to
+     *	other events save open/close.
+     *
+     *	This code must be sure never to sleep through a hangup.
+     *	Called without the kernel lock held - fine
+     *
+     *	FIXME: if someone changes the VMIN or discipline settings for the
+     *	terminal while another process is in poll() the poll does not
+     *	recompute the new limits. Possibly set_termios should issue
+     *	a read wakeup to fix this bug.
+     */
+     
+    static unsigned int normal_poll(struct tty_struct * tty, struct file * file, poll_table *wait)
+    {
+    	unsigned int mask = 0;
+    
+    	poll_wait(file, &tty->read_wait, wait);
+    	poll_wait(file, &tty->write_wait, wait);
+    	if (input_available_p(tty, TIME_CHAR(tty) ? 0 : MIN_CHAR(tty)))
+    		mask |= POLLIN | POLLRDNORM;
+    	if (tty->packet && tty->link->ctrl_status)
+    		mask |= POLLPRI | POLLIN | POLLRDNORM;
+    	if (test_bit(TTY_OTHER_CLOSED, &tty->flags))
+    		mask |= POLLHUP;
+    	if (tty_hung_up_p(file))
+    		mask |= POLLHUP;
+    	if (!(mask & (POLLHUP | POLLIN | POLLRDNORM))) {
+    		if (MIN_CHAR(tty) && !TIME_CHAR(tty))
+    			tty->minimum_to_wake = MIN_CHAR(tty);
+    		else
+    			tty->minimum_to_wake = 1;
+    	}
+    	if (tty->driver->chars_in_buffer(tty) < WAKEUP_CHARS &&
+    			tty->driver->write_room(tty) > 0)
+    		mask |= POLLOUT | POLLWRNORM;
+    	return mask;
+    }
+    
+
+3. the flow of poll
+
+    //file: fs/select.c, include/linux/poll.h
+
+    ->normal_poll
+     ->poll_wait
+      ->__pollwait
+       ->init_waitqueue_entry
+       ->add_wait_queue
+
+
+    static inline void poll_wait(struct file * filp, wait_queue_head_t * wait_address, poll_table *p)
+    {
+    	if (p && wait_address)
+    		p->qproc(filp, wait_address, p);  //qproc is initialized with __pollwait in do_select
+    }
+
+    void __pollwait(struct file *filp, wait_queue_head_t *wait_address, poll_table *_p)
+    {
+    	struct poll_wqueues *p = container_of(_p, struct poll_wqueues, pt);
+    	struct poll_table_page *table = p->table;
+    
+    	if (!table || POLL_TABLE_FULL(table)) {
+    		struct poll_table_page *new_table;
+    
+    		new_table = (struct poll_table_page *) __get_free_page(GFP_KERNEL);
+    		if (!new_table) {
+    			p->error = -ENOMEM;
+    			__set_current_state(TASK_RUNNING);
+    			return;
+    		}
+    		new_table->entry = new_table->entries;
+    		new_table->next = table;
+    		p->table = new_table;
+    		table = new_table;
+    	}
+    
+    	/* Add a new entry */
+    	{
+    		struct poll_table_entry * entry = table->entry;
+    		table->entry = entry+1;
+    	 	get_file(filp);
+    	 	entry->filp = filp;
+    		entry->wait_address = wait_address;
+    		init_waitqueue_entry(&entry->wait, current);
+    		add_wait_queue(wait_address,&entry->wait);
+    	}
+    }
+
+3.1 parameter
+
+    wait_address is the parameter passed from calling poll_wait such as in normal_poll like this.
+
+    poll_wait(file, &tty->read_wait, wait);
+    poll_wait(file, &tty->write_wait, wait);
+
+3.2 init_waitqueue_entry analysis
+
+    init a waitqueue entry, current is general get_current(), that is, the progress that calls select.
+    where, current is a macro like this.
+    
+    //file: include/asm-i386/current.h
+    #define current get_current()  //get the current progress pointer
+    
+    static inline struct task_struct * get_current(void)
+    {
+      return current_thread_info()->task;
+    }
+
+    //file: include/linux/wait.h
+    static inline void init_waitqueue_entry(wait_queue_t *q, struct task_struct *p)
+    {
+      q->flags = 0;
+      q->task = p;
+      q->func = default_wake_function;  //initialization
+    }
+
+    //file: kernel/sched.c    
+    int default_wake_function(wait_queue_t *curr, unsigned mode, int sync, void *key)
+    {
+    	task_t *p = curr->task;
+    	return try_to_wake_up(p, mode, sync);
+    }
+
+3.3 wake up the wait queue
+
+    generally, the process of waking up the wait queue is implemented in the related device driver, which maintains a wait queue for read and write of its resources. when some resouces of this device become readable or writable and there exists progress sleeping on the wait queue, it will wake up the wait queue like the following.
+    take 8250 type serial ports as an example, when there is data coming, serial8250_interrupt will be invoked. then, it will wake up the wait queue.
+
+    ->serial8250_interrupt     //file: drivers/char/8250.c
+     ->serial8250_handle_port
+      ->receive_chars
+       ->tty_flip_buffer_push  //file: drivers/char/tty_io.c
+        ->flush_to_ldisc
+         ->n_tty_receive_buf   //file: drivers/char/n_tty.c, call it by disc->receive_buf(tty, cp, fp, count);
+      
+
+    //file: dirvers/char/n_tty.c
+
+    /**
+     *	n_tty_receive_buf	-	data receive
+     *	@tty: terminal device
+     *	@cp: buffer
+     *	@fp: flag buffer
+     *	@count: characters
+     *
+     *	Called by the terminal driver when a block of characters has
+     *	been received. This function must be called from soft contexts
+     *	not from interrupt context. The driver is responsible for making
+     *	calls one at a time and in order (or using flush_to_ldisc)
+     */
+     
+    static void n_tty_receive_buf(struct tty_struct *tty, const unsigned char *cp,
+    			      char *fp, int count)
+    {
+      //...
+    
+      if (!tty->icanon && (tty->read_cnt >= tty->minimum_to_wake)) {
+    		kill_fasync(&tty->fasync, SIGIO, POLL_IN);
+    		if (waitqueue_active(&tty->read_wait))
+    			wake_up_interruptible(&tty->read_wait);
+    	}
+    
+      //...
+    }
+
+    //file: include/linux/wait.h
+    static inline int waitqueue_active(wait_queue_head_t *q)
+    {
+	    return !list_empty(&q->task_list);
+    }
+
+    #define wake_up_interruptible(x)	__wake_up(x, TASK_INTERRUPTIBLE, 1, NULL)
+
+
+3.4 wake up function
+
+    //file: kernel/sched.c
+    
+    /**
+     * __wake_up - wake up threads blocked on a waitqueue.
+     * @q: the waitqueue
+     * @mode: which threads
+     * @nr_exclusive: how many wake-one or wake-many threads to wake up
+     */
+    void fastcall __wake_up(wait_queue_head_t *q, unsigned int mode,
+    				int nr_exclusive, void *key)
+    {
+    	unsigned long flags;
+    
+    	spin_lock_irqsave(&q->lock, flags);
+    	__wake_up_common(q, mode, nr_exclusive, 0, key);
+    	spin_unlock_irqrestore(&q->lock, flags);
+    }
+
+    /*
+     * The core wakeup function.  Non-exclusive wakeups (nr_exclusive == 0) just
+     * wake everything up.  If it's an exclusive wakeup (nr_exclusive == small +ve
+     * number) then we wake all the non-exclusive tasks and one exclusive task.
+     *
+     * There are circumstances in which we can try to wake a task which has already
+     * started to run but is not in state TASK_RUNNING.  try_to_wake_up() returns
+     * zero in this (rare) case, and we handle it by continuing to scan the queue.
+     */
+    static void __wake_up_common(wait_queue_head_t *q, unsigned int mode,
+    			     int nr_exclusive, int sync, void *key)
+    {
+    	struct list_head *tmp, *next;
+    
+    	list_for_each_safe(tmp, next, &q->task_list) {
+    		wait_queue_t *curr;
+    		unsigned flags;
+    		curr = list_entry(tmp, wait_queue_t, task_list);
+    		flags = curr->flags;
+    		if (curr->func(curr, mode, sync, key) &&
+    		    (flags & WQ_FLAG_EXCLUSIVE) &&
+    		    !--nr_exclusive)
+    			break;
+    	}
+    }
+
+    where, curr->func(curr, mode, sync, key) will call the wait queue function registered in init_waitqueue_entry.
+
+3.5 wake up flow
+
+    ->waitqueue_active
+    ->wake_up_interruptible = ->__wake_up
+     ->__wake_up_common
+      ->default_wake_function  //wait_queue_func_t func; of wait_queue_t
+                               //initialized in init_waitqueue_entry
+       ->try_to_wake_up
+        ->activate_task
+         ->__activate_task
+          ->enqueue_task
+
+
+    //file: include/linux/wait.h
+
+    typedef struct __wait_queue wait_queue_t;
+    typedef int (*wait_queue_func_t)(wait_queue_t *wait, unsigned mode, int sync, void *key);
+    int default_wake_function(wait_queue_t *wait, unsigned mode, int sync, void *key);
+    
+    struct __wait_queue {
+    	unsigned int flags;
+    #define WQ_FLAG_EXCLUSIVE	0x01
+    	struct task_struct * task;
+    	wait_queue_func_t func;  //wait queue function
+    	struct list_head task_list;
+    };
+
+
+3.6 try_to_wake_up and activate_task
+
+    in fact, to wake up a progress and activate a task is to move it to the runqueue and do priority recalculation.
+    
+    //file: kernel/sched.c
+
+    /***
+     * try_to_wake_up - wake up a thread
+     * @p: the to-be-woken-up thread
+     * @state: the mask of task states that can be woken
+     * @sync: do a synchronous wakeup?
+     *
+     * Put it on the run-queue if it's not already there. The "current"
+     * thread is always on the run-queue (except when the actual
+     * re-schedule is in progress), and as such you're allowed to do
+     * the simpler "current->state = TASK_RUNNING" to mark yourself
+     * runnable without the overhead of this.
+     *
+     * returns failure only if the task is already active.
+     */
+    static int try_to_wake_up(task_t * p, unsigned int state, int sync)
+    {
+      //...
+
+    	/*
+    	 * Sync wakeups (i.e. those types of wakeups where the waker
+    	 * has indicated that it will leave the CPU in short order)
+    	 * don't trigger a preemption, if the woken up task will run on
+    	 * this cpu. (in this case the 'I will reschedule' promise of
+    	 * the waker guarantees that the freshly woken up task is going
+    	 * to be considered on this CPU.)
+    	 */
+    	activate_task(p, rq, cpu == this_cpu);
+    	if (!sync || cpu != this_cpu) {
+    		if (TASK_PREEMPTS_CURR(p, rq))
+    			resched_task(rq->curr);
+    	}
+    	success = 1;
+          
+      //...
+    }
+
+
+    /*
+     * activate_task - move a task to the runqueue and do priority recalculation
+     *
+     * Update all the scheduling statistics stuff. (sleep average
+     * calculation, priority modifiers, etc.)
+     */
+    static void activate_task(task_t *p, runqueue_t *rq, int local)
+    {
+    	unsigned long long now;
+    
+    	now = sched_clock();
+    #ifdef CONFIG_SMP
+    	if (!local) {
+    		/* Compensate for drifting sched_clock */
+    		runqueue_t *this_rq = this_rq();
+    		now = (now - this_rq->timestamp_last_tick)
+    			+ rq->timestamp_last_tick;
+    	}
+    #endif
+    
+    	recalc_task_prio(p, now);
+    
+    	/*
+    	 * This checks to make sure it's not an uninterruptible task
+    	 * that is now waking up.
+    	 */
+    	if (!p->activated) {
+    		/*
+    		 * Tasks which were woken up by interrupts (ie. hw events)
+    		 * are most likely of interactive nature. So we give them
+    		 * the credit of extending their sleep time to the period
+    		 * of time they spend on the runqueue, waiting for execution
+    		 * on a CPU, first time around:
+    		 */
+    		if (in_interrupt())
+    			p->activated = 2;
+    		else {
+    			/*
+    			 * Normal first-time wakeups get a credit too for
+    			 * on-runqueue time, but it will be weighted down:
+    			 */
+    			p->activated = 1;
+    		}
+    	}
+    	p->timestamp = now;
+    
+    	__activate_task(p, rq);
+    }
+
+
+4. reference
+
+    http://blog.chinaunix.net/u2/60011/showart_1334783.html
+    http://blog.chinaunix.net/u2/70445/showart_2098722.html
+    http://blog.chinaunix.net/u2/60011/showart_1334657.html

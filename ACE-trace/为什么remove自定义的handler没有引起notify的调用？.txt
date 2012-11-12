@@ -1,0 +1,191 @@
+为什么remove自定义的handler没有引起notify的调用？
+
+因为当前token的in_use_为0，即没有handler获得该锁。
+
+# gdb ./server81
+GNU gdb (GDB) 7.0-ubuntu
+Copyright (C) 2009 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "i486-linux-gnu".
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>...
+Reading symbols from /mnt/hgfs/programming/win32/Server/server81...done.
+(gdb) b MyTask::svc() 
+Breakpoint 1 at 0x8053345: file server81.cpp, line 125.
+(gdb) r
+Starting program: /mnt/hgfs/programming/win32/Server/server81 
+[Thread debugging using libthread_db enabled]
+---------------------------------------------
+input command to test the program
+ s or S : start the talker (ACE Task)
+ q or Q : quit
+---------------------------------------------
+$ input command >s
+(3086931664) main::start
+(3086931664) MyTask start
+[New Thread 0xb7fecb70 (LWP 4072)]
+[Switching to Thread 0xb7fecb70 (LWP 4072)]
+
+Breakpoint 1, MyTask::svc (this=0x806a774) at server81.cpp:125
+125     {
+(gdb) l
+120
+121         return 0;
+122     }
+123
+124     int MyTask::svc()
+125     {
+126         ACE_DEBUG ((LM_INFO, ACE_TEXT ("(%t) enter MyTask::svc()\n\n")));
+127
+128         //initialization
+129         selector = new ACE_Select_Reactor;
+(gdb) 
+130         ACE_Reactor* reactor = new ACE_Reactor(selector);
+131         ACE_Reactor::instance(reactor);  //then, ACE_Reactor::instance() is reactor
+132         this->reactor(reactor);  //this reactor_ of ACE_Event_Handler can not be set
+133
+134         //register socket handler
+135         Handler handler(UDP_PORT);
+136         if (reactor->register_handler(&handler, ACE_Event_Handler::READ_MASK) == -1)
+137         {
+138             ACE_ERROR((LM_ERROR, "%p\n", "cant't register with Reactor in MyTask::svc()\n"));
+139             return -1;
+(gdb) 
+140         }
+141
+142         //spawn mytask2
+143         mytask2::instance()->open(0);
+144
+145         //handle_events in forever-loop until receive two data packets from socket
+146         while (exit_flag == 0)
+147         {
+148             int result = reactor->handle_events();  //timeout will not occur at all
+149             if (result)
+(gdb) 
+150             {
+151                 ACE_DEBUG ((LM_INFO, ACE_TEXT ("(%t) handle_events() succeed, result = %d\n\n"), result));
+152                 if (RECV_COUNT == handler.get_count())
+153                     exit_flag = 1;
+154             }
+155             else
+156             {
+157                 ACE_ERROR((LM_ERROR, "%p\n", "handle_events() failed\n"));
+158                 return -1;
+159             }
+(gdb) 
+160         }
+161
+162         if (reactor->remove_handler(&handler, ACE_Event_Handler::READ_MASK | 
+163             ACE_Event_Handler::DONT_CALL) == -1)
+164         {
+165             ACE_ERROR((LM_ERROR, "%p\n", "cant't remove handler from Reactor\n"));
+166             return -1;
+167         }
+168
+169         ACE_DEBUG ((LM_INFO, ACE_TEXT ("(%t) exit MyTask::svc()\n\n")));
+(gdb) b server81.cpp:162
+Breakpoint 2 at 0x805365b: file server81.cpp, line 162.
+(gdb) b server81.cpp:169
+Breakpoint 3 at 0x80536ef: file server81.cpp, line 169.
+(gdb) c
+Continuing.
+(3086928752) enter MyTask::svc()
+
+(3086928752) in Handler()
+
+(3086928752) MyTask2 start
+[New Thread 0xb77ebb70 (LWP 4073)]
+(3078536048) enter MyTask2::svc()
+
+(3078536048) MyTask2::svc() register ACE_STDIN handler
+(3086928752) handle_events() succeed, result = 1
+
+(3078536048) MyTask2::svc() remove ACE_STDIN handler
+
+(3086928752) handle_events() succeed, result = 1
+
+(3078536048) MyTask2::svc() register ACE_STDIN handler
+(3086928752) handle_events() succeed, result = 1
+
+(3078536048) MyTask2::svc() remove ACE_STDIN handler
+
+(3086928752) handle_events() succeed, result = 1
+
+(3078536048) exit MyTask2::svc()
+
+[Thread 0xb77ebb70 (LWP 4073) exited]
+recv: No. = 1, host = localhost, IP = 7f000001, port = 60662, bytes = 21
+      data = a ACE_SOCK_Dgram test
+(3086928752) handle_events() succeed, result = 1
+
+recv: No. = 2, host = localhost, IP = 7f000001, port = 53166, bytes = 21
+      data = a ACE_SOCK_Dgram test
+(3086928752) handle_events() succeed, result = 1
+
+
+Breakpoint 2, MyTask::svc (this=0x806a774) at server81.cpp:162
+162         if (reactor->remove_handler(&handler, ACE_Event_Handler::READ_MASK | 
+(gdb) b ACE_Token::shared_acquire(void (*)(void*), void*, ACE_Time_Value*, ACE_Token::ACE_Token_Op_Type) 
+Breakpoint 4 at 0x3e0aca: file ../../ace/Token.cpp, line 188.
+(gdb) b Token.cpp:199
+Breakpoint 5 at 0x3e0b01: file ../../ace/Token.cpp, line 199.
+(gdb) b Token.cpp:212
+Breakpoint 6 at 0x3e0b0f: file ../../ace/Token.cpp, line 212.
+(gdb) c
+Continuing.
+
+Breakpoint 4, ACE_Token::shared_acquire (this=0x806d278, sleep_hook_func=0, arg=0x0, timeout=0x0, op_type=ACE_Token::WRITE_TOKEN)
+    at ../../ace/Token.cpp:188
+188     {
+(gdb) bt
+#0  ACE_Token::shared_acquire (this=0x806d278, sleep_hook_func=0, arg=0x0, timeout=0x0, op_type=ACE_Token::WRITE_TOKEN)
+    at ../../ace/Token.cpp:188
+#1  0x003e0dec in ACE_Token::acquire (this=0x806d278, timeout=0x0) at ../../ace/Token.cpp:339
+#2  0x08057125 in ACE_Guard<ACE_Reactor_Token_T<ACE_Token> >::acquire (this=0xb7fec1b8) at /usr/local/include/ace/Guard_T.inl:12
+#3  0x08056a55 in ACE_Guard (this=0xb7fec1b8, l=...) at /usr/local/include/ace/Guard_T.inl:38
+#4  0x0805a673 in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::remove_handler (this=0x806cba8, handler=0xb7fec264, mask=513)
+    at /usr/local/include/ace/Select_Reactor_T.cpp:337
+#5  0x080551f3 in ACE_Reactor::remove_handler (this=0x806e500, event_handler=0xb7fec264, mask=513) at /usr/local/include/ace/Reactor.inl:237
+#6  0x08053675 in MyTask::svc (this=0x806a774) at server81.cpp:162
+#7  0x003d6b52 in ACE_Task_Base::svc_run (args=0x806a774) at ../../ace/Task.cpp:275
+#8  0x003d7eed in ACE_Thread_Adapter::invoke_i (this=0x806a9f0) at ../../ace/Thread_Adapter.cpp:149
+#9  0x003d7f65 in ACE_Thread_Adapter::invoke (this=0x806a9f0) at ../../ace/Thread_Adapter.cpp:98
+#10 0x0034e5c1 in ace_thread_adapter (args=0x806a9f0) at ../../ace/Base_Thread_Adapter.cpp:124
+#11 0x00b8e80e in start_thread () from /lib/tls/i686/cmov/libpthread.so.0
+#12 0x004f37ee in clone () from /lib/tls/i686/cmov/libc.so.6
+(gdb) c
+Continuing.
+
+Breakpoint 5, ACE_Token::shared_acquire (this=0x806d278, sleep_hook_func=0, arg=0x0, timeout=0x0, op_type=ACE_Token::WRITE_TOKEN)
+    at ../../ace/Token.cpp:199
+199       if (!this->in_use_)
+(gdb) p *this
+$1 = {_vptr.ACE_Token = 0x805ffe0, writers_ = {head_ = 0x0, tail_ = 0x0}, readers_ = {head_ = 0x0, tail_ = 0x0}, lock_ = {lock_ = {
+      __data = {__lock = 1, __count = 0, __owner = 4072, __kind = 0, __nusers = 1, {__spins = 0, __list = {__next = 0x0}}}, 
+      __size = "\001\000\000\000\000\000\000\000\350\017\000\000\000\000\000\000\001\000\000\000\000\000\000", __align = 1}, 
+    removed_ = false}, owner_ = 0, in_use_ = 0, waiters_ = 0, nesting_level_ = 0, attributes_ = {attributes_ = {__size = "\000\000\000", 
+      __align = 0}}, queueing_strategy_ = -1}
+(gdb) p this->in_use_ 
+$2 = 0
+(gdb) c
+Continuing.
+
+Breakpoint 3, MyTask::svc (this=0x806a774) at server81.cpp:169
+169         ACE_DEBUG ((LM_INFO, ACE_TEXT ("(%t) exit MyTask::svc()\n\n")));
+(gdb) c
+Continuing.
+(3086928752) exit MyTask::svc()
+
+(3086928752) in ~Handler()
+
+[Thread 0xb7fecb70 (LWP 4072) exited]
+(3086931664) main::end
+
+$ input command >q
+
+Program exited normally.
+(gdb) q
+root@yu29:/mnt/hgfs/programming/win32/Server# 

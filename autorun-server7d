@@ -1,0 +1,17 @@
+#! /usr/bin/expect -f
+
+package require Thread 
+set t [thread::create]  ;# Create a thread 
+
+spawn ./server7d
+expect -exact "$ input command >"
+send -- "s\r"
+expect -exact "main::start"
+expect -exact "in Handler()"
+
+thread::send -async $t {exec ./autorun-client}
+
+expect -exact "exit MyTask::svc()"
+expect -exact "main::end"
+expect -exact "$ input command >"
+send -- "q\r"

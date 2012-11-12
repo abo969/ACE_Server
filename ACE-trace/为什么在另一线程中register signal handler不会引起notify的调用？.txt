@@ -1,0 +1,313 @@
+为什么在另一线程中register signal handler不会引起notify的调用？.txt
+
+1. register signal handler callstack
+
+->ACE_Reactor::register_handler(SIGINT, &handler)
+ ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::register_handler(SIGINT, &handler)
+  ->ACE_Sig_Handler::register_handler(SIGINT, &handler)
+   ->ACE_Sig_Handler::register_handler_i(SIGINT, &handler)
+    ->ACE_Sig_Handler::handler_i
+
+register signal handler只是在ACE_Sig_Handler的静态成员static ACE_Event_Handler *signal_handlers_[ACE_NSIG];数组中为第signum项赋值。
+
+
+2. debug analysis
+
+# g++ -g -o server82 server82.cpp -lACE -lpthread
+# gdb ./server82
+GNU gdb (GDB) 7.0-ubuntu
+Copyright (C) 2009 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "i486-linux-gnu".
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>...
+Reading symbols from /mnt/hgfs/programming/win32/Server/server82...done.
+(gdb) b 214
+Breakpoint 1 at 0x8053919: file server82.cpp, line 214.
+(gdb) b 220
+Breakpoint 2 at 0x80539be: file server82.cpp, line 220.
+(gdb) r
+Starting program: /mnt/hgfs/programming/win32/Server/server82 
+[Thread debugging using libthread_db enabled]
+---------------------------------------------
+input command to test the program
+ s or S : start the talker (ACE Task)
+ q or Q : quit
+---------------------------------------------
+$ input command >s
+(3086931664) main::start
+(3086931664) MyTask start
+[New Thread 0xb7fecb70 (LWP 23124)]
+(3086928752) enter MyTask::svc()
+
+(3086928752) in Handler()
+
+(3086928752) MyTask2 start
+[New Thread 0xb77ebb70 (LWP 23125)]
+(3078536048) enter MyTask2::svc()
+
+(3078536048) MyTask2::svc() register user-defined read handler
+[Switching to Thread 0xb77ebb70 (LWP 23125)]
+
+Breakpoint 1, MyTask2::svc (this=0x80705c4) at server82.cpp:214
+214             if (ACE_Reactor::instance()->register_handler(SIGINT, &handler) == -1)
+(gdb) b ACE_Sig_Handler::handler_i
+Breakpoint 3 at 0x432a0d: file ../../ace/Sig_Handler.cpp, line 111.
+(gdb) b ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::notify
+Breakpoint 4 at 0x805b1fe: file /usr/local/include/ace/Select_Reactor_T.cpp, line 213.
+(gdb) c
+Continuing.
+
+Breakpoint 3, ACE_Sig_Handler::handler_i (signum=2, new_sh=0xb77eb274) at ../../ace/Sig_Handler.cpp:111
+111       if (ACE_Sig_Handler::in_range (signum))
+(gdb) bt
+#0  ACE_Sig_Handler::handler_i (signum=2, new_sh=0xb77eb274) at ../../ace/Sig_Handler.cpp:111
+#1  0x00bf8cb3 in ACE_Sig_Handler::register_handler_i (signum=2, new_sh=0xb77eb274, new_disp=0x0, old_sh=0x0, old_disp=0x0)
+    at ../../ace/Sig_Handler.cpp:152
+#2  0x00bfad63 in ACE_Sig_Handler::register_handler (this=0x806b9f0, signum=2, new_sh=0xb77eb274, new_disp=0x0, old_sh=0x0, old_disp=0x0)
+    at ../../ace/Sig_Handler.cpp:195
+#3  0x0805a595 in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::register_handler (this=0x806dba8, signum=2, new_sh=0xb77eb274, 
+    new_disp=0x0, old_sh=0x0, old_disp=0x0) at /usr/local/include/ace/Select_Reactor_T.inl:72
+#4  0x080550e0 in ACE_Reactor::register_handler (this=0x806f500, signum=2, new_sh=0xb77eb274, new_disp=0x0, old_sh=0x0, old_disp=0x0)
+    at /usr/local/include/ace/Reactor.inl:220
+#5  0x0805394d in MyTask2::svc (this=0x80705c4) at server82.cpp:214
+#6  0x00c02b52 in ACE_Task_Base::svc_run (args=0x80705c4) at ../../ace/Task.cpp:275
+#7  0x00c03eed in ACE_Thread_Adapter::invoke_i (this=0x80706e0) at ../../ace/Thread_Adapter.cpp:149
+#8  0x00c03f65 in ACE_Thread_Adapter::invoke (this=0x80706e0) at ../../ace/Thread_Adapter.cpp:98
+#9  0x00b7a5c1 in ace_thread_adapter (args=0x80706e0) at ../../ace/Base_Thread_Adapter.cpp:124
+#10 0x00de080e in start_thread () from /lib/tls/i686/cmov/libpthread.so.0
+#11 0x007ec7ee in clone () from /lib/tls/i686/cmov/libc.so.6
+(gdb) l
+106     ACE_Sig_Handler::handler_i (int signum,
+107                                 ACE_Event_Handler *new_sh)
+108     {
+109       ACE_TRACE ("ACE_Sig_Handler::handler_i");
+110
+111       if (ACE_Sig_Handler::in_range (signum))
+112         {
+113           ACE_Event_Handler *sh = ACE_Sig_Handler::signal_handlers_[signum];
+114
+115           ACE_Sig_Handler::signal_handlers_[signum] = new_sh;
+(gdb) 
+116           return sh;
+117         }
+118       else
+119         return 0;
+120     }
+121
+122     ACE_Event_Handler *
+123     ACE_Sig_Handler::handler (int signum,
+124                               ACE_Event_Handler *new_sh)
+125     {
+(gdb) n
+113           ACE_Event_Handler *sh = ACE_Sig_Handler::signal_handlers_[signum];
+(gdb) 
+115           ACE_Sig_Handler::signal_handlers_[signum] = new_sh;
+(gdb) p signal_handlers_ 
+$1 = {0x0 <repeats 65 times>}
+(gdb) p *signal_handlers_@65
+$2 = {0x0 <repeats 65 times>}
+(gdb) n
+113           ACE_Event_Handler *sh = ACE_Sig_Handler::signal_handlers_[signum];
+(gdb) 
+115           ACE_Sig_Handler::signal_handlers_[signum] = new_sh;
+(gdb) 
+120     }
+(gdb) p *signal_handlers_@65
+$3 = {0x0, 0x0, 0xb77eb274, 0x0 <repeats 62 times>}
+(gdb) c
+Continuing.
+
+Breakpoint 2, MyTask2::svc (this=0x80705c4) at server82.cpp:220
+220             ACE_OS::sleep(1);
+(gdb) p handler 
+$4 = {<ACE_Event_Handler> = {_vptr.ACE_Event_Handler = 0x8060088, reference_count_ = {value_ = 1, 
+      static increment_fn_ = 0x3b3c80 <multi_cpu_increment>, static decrement_fn_ = 0x3b3ca0 <multi_cpu_decrement>, 
+      static exchange_fn_ = 0x3b3cc0 <multi_cpu_exchange>, static exchange_add_fn_ = 0x3b3cd0 <multi_cpu_exchange_add>}, priority_ = 0, 
+    reactor_ = 0x0, reference_counting_policy_ = {<ACE_Event_Handler::Policy> = {_vptr.Policy = 0x486638}, 
+      value_ = ACE_Event_Handler::Reference_Counting_Policy::DISABLED}}, <No data fields>}
+(gdb) p &handler
+$5 = (SigintHandler *) 0xb77eb274
+(gdb) 
+
+
+3. ACE_Sig_Handler definition
+
+//file: ace/Sig_Handler.h
+
+/**
+ * @class ACE_Sig_Handler
+ *
+ * @brief This is the main dispatcher of signals for ACE.  It improves
+ * the existing UNIX signal handling mechanism by allowing C++
+ * objects to handle signals in a way that avoids the use of
+ * global/static variables and functions.
+ *
+ * Using this class a program can register an ACE_Event_Handler
+ * with the ACE_Sig_Handler in order to handle a designated
+ * @a signum.  When a signal occurs that corresponds to this
+ * @a signum, the @c handle_signal method of the registered
+ * ACE_Event_Handler is invoked automatically.
+ */
+class ACE_Export ACE_Sig_Handler
+{
+public:
+  /// Default ctor/dtor.
+  ACE_Sig_Handler (void);
+  virtual ~ACE_Sig_Handler (void);
+
+  // = Registration and removal methods.
+  /**
+   * Add a new ACE_Event_Handler and a new sigaction associated with
+   * @a signum.  Passes back the existing ACE_Event_Handler and its
+   * sigaction if pointers are non-zero.  Returns -1 on failure and >=
+   * 0 on success.
+   */
+  virtual int register_handler (int signum,
+                                ACE_Event_Handler *new_sh,
+                                ACE_Sig_Action *new_disp = 0,
+                                ACE_Event_Handler **old_sh = 0,
+                                ACE_Sig_Action *old_disp = 0);
+
+  /**
+   * Remove the ACE_Event_Handler currently associated with
+   * @a signum.  @a sigkey is ignored in this implementation since there
+   * is only one instance of a signal handler.  Install the new
+   * disposition (if given) and return the previous disposition (if
+   * desired by the caller).  Returns 0 on success and -1 if @a signum
+   * is invalid.
+   */
+  virtual int remove_handler (int signum,
+                              ACE_Sig_Action *new_disp = 0,
+                              ACE_Sig_Action *old_disp = 0,
+                              int sigkey = -1);
+
+  // Set/get signal status.
+  /// True if there is a pending signal.
+  static int sig_pending (void);
+
+  /// Reset the value of <sig_pending_> so that no signal is pending.
+  static void sig_pending (int);
+
+  // = Set/get the handler associated with a particular signal.
+
+  /// Return the ACE_Sig_Handler associated with @a signum.
+  virtual ACE_Event_Handler *handler (int signum);
+
+  /// Set a new ACE_Event_Handler that is associated with @a signum.
+  /// Return the existing handler.
+  virtual ACE_Event_Handler *handler (int signum,
+                                      ACE_Event_Handler *);
+
+  /**
+   * Callback routine registered with sigaction(2) that dispatches the
+   * <handle_signal> method of the appropriate pre-registered
+   * ACE_Event_Handler.
+   */
+  static void dispatch (int, siginfo_t *,
+                        ucontext_t *);
+
+  /// Dump the state of an object.
+  void dump (void) const;
+
+  /// Declare the dynamic allocation hooks.
+  ACE_ALLOC_HOOK_DECLARE;
+
+protected:
+  // = These methods and data members are shared by derived classes.
+
+  /**
+   * Set a new ACE_Event_Handler that is associated with @a signum.
+   * Return the existing handler.  Does not acquire any locks so that
+   * it can be called from a signal handler, such as <dispatch>.
+   */
+  static ACE_Event_Handler *handler_i (int signum,
+                                       ACE_Event_Handler *);
+
+  /**
+   * This implementation method is called by <register_handler> and
+   * @c dispatch.  It doesn't do any locking so that it can be called
+   * within a signal handler, such as @c dispatch.  It adds a new
+   * ACE_Event_Handler and a new sigaction associated with @a signum.
+   * Passes back the existing ACE_Event_Handler and its sigaction if
+   * pointers are non-zero.  Returns -1 on failure and >= 0 on
+   * success.
+   */
+  static int register_handler_i (int signum,
+                                 ACE_Event_Handler *new_sh,
+                                 ACE_Sig_Action *new_disp = 0,
+                                 ACE_Event_Handler **old_sh = 0,
+                                 ACE_Sig_Action *old_disp = 0);
+
+  /// Check whether the SIGNUM is within the legal range of signals.
+  static int in_range (int signum);
+
+  /// Keeps track of whether a signal is pending.
+  static sig_atomic_t sig_pending_;
+
+private:
+  /// Array used to store one user-defined Event_Handler for every
+  /// signal.
+  static ACE_Event_Handler *signal_handlers_[ACE_NSIG];
+};
+
+//here, signal_handlers_ has 65 elements.
+static ACE_Event_Handler *signal_handler_[65];
+
+
+4. the related definition of signal
+
+//file: ace/os_include/os_signal.h
+
+#if defined (ACE_VXWORKS)
+#  define ACE_NSIG (_NSIGS + 1)
+#elif defined (__Lynx__) || defined (ACE_HAS_RTEMS)
+#  define ACE_NSIG (NSIG + 1)
+#else
+   // All other platforms set NSIG to one greater than the
+   // highest-numbered signal.
+#  define ACE_NSIG NSIG
+#endif /* __Lynx__ */
+
+
+//file: include/asm-i386/signal.h
+
+#define _NSIG		64
+#define _NSIG_BPW	32
+#define _NSIG_WORDS	(_NSIG / _NSIG_BPW)
+
+typedef unsigned long old_sigset_t;		/* at least 32 bits */
+
+typedef struct {
+	unsigned long sig[_NSIG_WORDS];
+} sigset_t;
+
+#else
+/* Here we must cater to libcs that poke about in kernel headers.  */
+
+#define NSIG		32
+typedef unsigned long sigset_t;
+
+#endif /* __KERNEL__ */
+
+#define SIGHUP		 1
+#define SIGINT		 2
+#define SIGQUIT		 3
+#define SIGILL		 4
+//...
+#define SIGWINCH	28
+#define SIGIO		29
+#define SIGPOLL		SIGIO
+/*
+#define SIGLOST		29
+*/
+#define SIGPWR		30
+#define SIGSYS		31
+#define	SIGUNUSED	31
+
+/* These should not be considered constants from userland.  */
+#define SIGRTMIN	32
+#define SIGRTMAX	_NSIG

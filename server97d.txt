@@ -1,0 +1,783 @@
+spawn ./server97d
+---------------------------------------------
+input command to test the program
+ s or S : start the talker (ACE Task)
+ q or Q : quit
+---------------------------------------------
+(3079087824) calling ACE_Task<ACE_SYNCH_USE>::ACE_Task in file `/usr/local/include/ace/Task_T.cpp' on line 55
+   (3079087824) calling ACE_Message_Queue<ACE_SYNCH_USE>::ACE_Message_Queue in file `/usr/local/include/ace/Message_Queue_T.cpp' on line 930
+      (3079087824) calling ACE_Message_Queue<ACE_SYNCH_USE>::open in file `/usr/local/include/ace/Message_Queue_T.cpp' on line 986
+      (3079087824) leaving ACE_Message_Queue<ACE_SYNCH_USE>::open
+   (3079087824) leaving ACE_Message_Queue<ACE_SYNCH_USE>::ACE_Message_Queue
+(3079087824) leaving ACE_Task<ACE_SYNCH_USE>::ACE_Task
+(3079087824) in MyTask:: MyTask()
+$ input command >s
+(3079087824) in MyTask::open
+(3079084912) enter MyTask::svc()
+
+(3079084912) calling ACE_Reactor_Token_T::ACE_Reactor_Token in file `/usr/local/include/ace/Reactor_Token_T.cpp' on line 35
+(3079084912) leaving ACE_Reactor_Token_T::ACE_Reactor_Token
+(3079084912) calling ACE_Select_Reactor_T::ACE_Select_Reactor_T in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 484
+   (3079084912) calling ACE_Select_Reactor_T::open in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 376
+      (3079084912) calling ACE_Timer_Queue_T::ACE_Timer_Queue_T in file `/usr/local/include/ace/Timer_Queue_T.cpp' on line 175
+      (3079084912) leaving ACE_Timer_Queue_T::ACE_Timer_Queue_T
+      (3079084912) calling ACE_Timer_Heap_T::ACE_Timer_Heap_T in file `/usr/local/include/ace/Timer_Heap_T.cpp' on line 178
+         (3079084912) calling ACE_Timer_Heap_Iterator_T::ACE_Timer_Heap_Iterator in file `/usr/local/include/ace/Timer_Heap_T.cpp' on line 47
+         (3079084912) leaving ACE_Timer_Heap_Iterator_T::ACE_Timer_Heap_Iterator
+      (3079084912) leaving ACE_Timer_Heap_T::ACE_Timer_Heap_T
+      (3079084912) calling ACE_Select_Reactor_T::register_handler in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 285
+         (3079084912) calling ACE_Select_Reactor_T::register_handler_i in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 992
+            (3079084912) calling ACE_Select_Reactor_T::is_suspended_i in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 974
+               (3079084912) calling ACE_Select_Reactor_Handler_Repository::find in file `/usr/local/include/ace/Select_Reactor_Base.inl' on line 46
+               (3079084912) leaving ACE_Select_Reactor_Handler_Repository::find
+               (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+               (3079084912) leaving ACE_Handle_Set::is_set
+               (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+               (3079084912) leaving ACE_Handle_Set::is_set
+               (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+               (3079084912) leaving ACE_Handle_Set::is_set
+            (3079084912) leaving ACE_Select_Reactor_T::is_suspended_i
+            (3079084912) calling ACE_Handle_Set::set_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 101
+               (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+               (3079084912) leaving ACE_Handle_Set::is_set
+            (3079084912) leaving ACE_Handle_Set::set_bit
+         (3079084912) leaving ACE_Select_Reactor_T::register_handler_i
+      (3079084912) leaving ACE_Select_Reactor_T::register_handler
+   (3079084912) leaving ACE_Select_Reactor_T::open
+(3079084912) leaving ACE_Select_Reactor_T::ACE_Select_Reactor_T
+(3079084912) calling ACE_SOCK_Dgram::ACE_SOCK_Dgram in file `/usr/local/include/ace/SOCK_Dgram.inl' on line 16
+(3079084912) leaving ACE_SOCK_Dgram::ACE_SOCK_Dgram
+(3079084912) in Handler()
+
+(3079084912) calling ACE_SOCK_Dgram::~ACE_SOCK_Dgram in file `/usr/local/include/ace/SOCK_Dgram.inl' on line 22
+(3079084912) leaving ACE_SOCK_Dgram::~ACE_SOCK_Dgram
+(3079084912) calling ACE_Select_Reactor_T::register_handler in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 274
+   (3079084912) calling ACE_IPC_SAP::get_handle in file `/usr/local/include/ace/IPC_SAP.inl' on line 18
+   (3079084912) leaving ACE_IPC_SAP::get_handle
+   (3079084912) calling ACE_Select_Reactor_T::register_handler_i in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 992
+      (3079084912) calling ACE_Select_Reactor_T::is_suspended_i in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 974
+         (3079084912) calling ACE_Select_Reactor_Handler_Repository::find in file `/usr/local/include/ace/Select_Reactor_Base.inl' on line 46
+         (3079084912) leaving ACE_Select_Reactor_Handler_Repository::find
+         (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+         (3079084912) leaving ACE_Handle_Set::is_set
+         (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+         (3079084912) leaving ACE_Handle_Set::is_set
+         (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+         (3079084912) leaving ACE_Handle_Set::is_set
+      (3079084912) leaving ACE_Select_Reactor_T::is_suspended_i
+      (3079084912) calling ACE_Handle_Set::set_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 101
+         (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+         (3079084912) leaving ACE_Handle_Set::is_set
+      (3079084912) leaving ACE_Handle_Set::set_bit
+   (3079084912) leaving ACE_Select_Reactor_T::register_handler_i
+(3079084912) leaving ACE_Select_Reactor_T::register_handler
+(3079084912) calling ACE_Task<ACE_SYNCH_USE>::ACE_Task in file `/usr/local/include/ace/Task_T.cpp' on line 55
+   (3079084912) calling ACE_Message_Queue<ACE_SYNCH_USE>::ACE_Message_Queue in file `/usr/local/include/ace/Message_Queue_T.cpp' on line 930
+      (3079084912) calling ACE_Message_Queue<ACE_SYNCH_USE>::open in file `/usr/local/include/ace/Message_Queue_T.cpp' on line 986
+      (3079084912) leaving ACE_Message_Queue<ACE_SYNCH_USE>::open
+   (3079084912) leaving ACE_Message_Queue<ACE_SYNCH_USE>::ACE_Message_Queue
+(3079084912) leaving ACE_Task<ACE_SYNCH_USE>::ACE_Task
+(3079084912) MyTask2 start
+(3079084912) calling ACE_Select_Reactor_T::handle_events in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1397
+   (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+   (3079084912) leaving ACE_Handle_Set::reset
+   (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+   (3079084912) leaving ACE_Handle_Set::reset
+   (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+   (3079084912) leaving ACE_Handle_Set::reset
+   (3079084912) calling ACE_Select_Reactor_T::wait_for_multiple_events in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1069
+      (3079084912) calling ACE_Select_Reactor_T::any_ready in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 47
+         (3079084912) calling ACE_Sig_Set::ACE_Sig_Set in file `/usr/local/include/ace/Signal.inl' on line 30
+         (3079084912) leaving ACE_Sig_Set::ACE_Sig_Set
+         (3079084912) calling ACE_Sig_Set::operator sigset_t * in file `/usr/local/include/ace/Signal.inl' on line 88
+         (3079084912) leaving ACE_Sig_Set::operator sigset_t *
+         (3079084912) calling ACE_Select_Reactor_T::any_ready_i in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 65
+            (3079084912) calling ACE_Handle_Set::num_set in file `/usr/local/include/ace/Handle_Set.inl' on line 154
+            (3079084912) leaving ACE_Handle_Set::num_set
+            (3079084912) calling ACE_Handle_Set::num_set in file `/usr/local/include/ace/Handle_Set.inl' on line 154
+            (3079084912) leaving ACE_Handle_Set::num_set
+            (3079084912) calling ACE_Handle_Set::num_set in file `/usr/local/include/ace/Handle_Set.inl' on line 154
+            (3079084912) leaving ACE_Handle_Set::num_set
+         (3079084912) leaving ACE_Select_Reactor_T::any_ready_i
+      (3079084912) leaving ACE_Select_Reactor_T::any_ready
+      (3079084912) calling ACE_Timer_Queue_T::calculate_timeout in file `/usr/local/include/ace/Timer_Queue_T.cpp' on line 116
+         (3079084912) calling ACE_Timer_Heap_T::is_empty in file `/usr/local/include/ace/Timer_Heap_T.cpp' on line 315
+         (3079084912) leaving ACE_Timer_Heap_T::is_empty
+      (3079084912) leaving ACE_Timer_Queue_T::calculate_timeout
+      (3079084912) calling ACE_Handle_Set::operator = in file `/usr/local/include/ace/Handle_Set.inl' on line 48
+      (3079084912) leaving ACE_Handle_Set::operator =
+      (3079084912) calling ACE_Handle_Set::operator = in file `/usr/local/include/ace/Handle_Set.inl' on line 48
+         (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+         (3079084912) leaving ACE_Handle_Set::reset
+      (3079084912) leaving ACE_Handle_Set::operator =
+      (3079084912) calling ACE_Handle_Set::operator = in file `/usr/local/include/ace/Handle_Set.inl' on line 48
+         (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+         (3079084912) leaving ACE_Handle_Set::reset
+      (3079084912) leaving ACE_Handle_Set::operator =
+      (3079084912) calling ACE_Handle_Set::operator fd_set * in file `/usr/local/include/ace/Handle_Set.inl' on line 167
+      (3079084912) leaving ACE_Handle_Set::operator fd_set *
+      (3079084912) calling ACE_Handle_Set::operator fd_set * in file `/usr/local/include/ace/Handle_Set.inl' on line 167
+      (3079084912) leaving ACE_Handle_Set::operator fd_set *
+      (3079084912) calling ACE_Handle_Set::operator fd_set * in file `/usr/local/include/ace/Handle_Set.inl' on line 167
+      (3079084912) leaving ACE_Handle_Set::operator fd_set *
+(3070692208) enter MyTask2::svc()
+
+(3070692208) MyTask2::svc() register exit handler
+(3070692208) calling ACE_Select_Reactor_T::register_handler in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 285
+   (3070692208) calling ACE_Reactor_Token_T::sleep_hook in file `/usr/local/include/ace/Reactor_Token_T.cpp' on line 63
+      (3070692208) calling ACE_Select_Reactor_T::notify in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 207
+      (3070692208) leaving ACE_Select_Reactor_T::notify
+   (3070692208) leaving ACE_Reactor_Token_T::sleep_hook
+   (3079084912) leaving ACE_Select_Reactor_T::wait_for_multiple_events
+   (3079084912) calling ACE_Select_Reactor_T::dispatch in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1278
+      (3079084912) calling ACE_Timer_Heap_T::is_empty in file `/usr/local/include/ace/Timer_Heap_T.cpp' on line 315
+      (3079084912) leaving ACE_Timer_Heap_T::is_empty
+      (3079084912) calling ACE_Select_Reactor_T::renew in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 195
+   (3070692208) calling ACE_Select_Reactor_T::register_handler_i in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 992
+      (3070692208) calling ACE_Select_Reactor_T::is_suspended_i in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 974
+         (3070692208) calling ACE_Select_Reactor_Handler_Repository::find in file `/usr/local/include/ace/Select_Reactor_Base.inl' on line 46
+         (3070692208) leaving ACE_Select_Reactor_Handler_Repository::find
+         (3070692208) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+         (3070692208) leaving ACE_Handle_Set::is_set
+         (3070692208) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+         (3070692208) leaving ACE_Handle_Set::is_set
+         (3070692208) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+         (3070692208) leaving ACE_Handle_Set::is_set
+      (3070692208) leaving ACE_Select_Reactor_T::is_suspended_i
+      (3070692208) calling ACE_Handle_Set::set_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 101
+         (3070692208) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+         (3070692208) leaving ACE_Handle_Set::is_set
+      (3070692208) leaving ACE_Handle_Set::set_bit
+   (3070692208) leaving ACE_Select_Reactor_T::register_handler_i
+(3070692208) leaving ACE_Select_Reactor_T::register_handler
+      (3079084912) leaving ACE_Select_Reactor_T::renew
+      (3079084912) calling ACE_Select_Reactor_T::dispatch_io_handlers in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1228
+         (3079084912) calling ACE_Select_Reactor_T::dispatch_io_set in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1190
+         (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_set
+         (3079084912) calling ACE_Select_Reactor_T::dispatch_io_set in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1190
+         (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_set
+         (3079084912) calling ACE_Select_Reactor_T::dispatch_io_set in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1190
+         (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_set
+      (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_handlers
+   (3079084912) leaving ACE_Select_Reactor_T::dispatch
+(3079084912) leaving ACE_Select_Reactor_T::handle_events
+(3079084912) handle_events() succeed, result = 1
+
+(3079084912) calling ACE_Select_Reactor_T::handle_events in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1397
+   (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+   (3079084912) leaving ACE_Handle_Set::reset
+   (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+   (3079084912) leaving ACE_Handle_Set::reset
+   (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+   (3079084912) leaving ACE_Handle_Set::reset
+   (3079084912) calling ACE_Select_Reactor_T::wait_for_multiple_events in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1069
+      (3079084912) calling ACE_Select_Reactor_T::any_ready in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 47
+         (3079084912) calling ACE_Sig_Set::ACE_Sig_Set in file `/usr/local/include/ace/Signal.inl' on line 30
+         (3079084912) leaving ACE_Sig_Set::ACE_Sig_Set
+         (3079084912) calling ACE_Sig_Set::operator sigset_t * in file `/usr/local/include/ace/Signal.inl' on line 88
+         (3079084912) leaving ACE_Sig_Set::operator sigset_t *
+         (3079084912) calling ACE_Select_Reactor_T::any_ready_i in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 65
+            (3079084912) calling ACE_Handle_Set::num_set in file `/usr/local/include/ace/Handle_Set.inl' on line 154
+            (3079084912) leaving ACE_Handle_Set::num_set
+            (3079084912) calling ACE_Handle_Set::num_set in file `/usr/local/include/ace/Handle_Set.inl' on line 154
+            (3079084912) leaving ACE_Handle_Set::num_set
+            (3079084912) calling ACE_Handle_Set::num_set in file `/usr/local/include/ace/Handle_Set.inl' on line 154
+            (3079084912) leaving ACE_Handle_Set::num_set
+         (3079084912) leaving ACE_Select_Reactor_T::any_ready_i
+      (3079084912) leaving ACE_Select_Reactor_T::any_ready
+      (3079084912) calling ACE_Timer_Queue_T::calculate_timeout in file `/usr/local/include/ace/Timer_Queue_T.cpp' on line 116
+         (3079084912) calling ACE_Timer_Heap_T::is_empty in file `/usr/local/include/ace/Timer_Heap_T.cpp' on line 315
+         (3079084912) leaving ACE_Timer_Heap_T::is_empty
+      (3079084912) leaving ACE_Timer_Queue_T::calculate_timeout
+      (3079084912) calling ACE_Handle_Set::operator = in file `/usr/local/include/ace/Handle_Set.inl' on line 48
+      (3079084912) leaving ACE_Handle_Set::operator =
+      (3079084912) calling ACE_Handle_Set::operator = in file `/usr/local/include/ace/Handle_Set.inl' on line 48
+         (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+         (3079084912) leaving ACE_Handle_Set::reset
+      (3079084912) leaving ACE_Handle_Set::operator =
+      (3079084912) calling ACE_Handle_Set::operator = in file `/usr/local/include/ace/Handle_Set.inl' on line 48
+      (3079084912) leaving ACE_Handle_Set::operator =
+      (3079084912) calling ACE_Handle_Set::operator fd_set * in file `/usr/local/include/ace/Handle_Set.inl' on line 167
+      (3079084912) leaving ACE_Handle_Set::operator fd_set *
+      (3079084912) calling ACE_Handle_Set::operator fd_set * in file `/usr/local/include/ace/Handle_Set.inl' on line 167
+      (3079084912) leaving ACE_Handle_Set::operator fd_set *
+      (3079084912) calling ACE_Handle_Set::operator fd_set * in file `/usr/local/include/ace/Handle_Set.inl' on line 167
+      (3079084912) leaving ACE_Handle_Set::operator fd_set *
+(3070692208) MyTask2::svc() remove exit handler
+
+(3070692208) calling ACE_Select_Reactor_T::remove_handler in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 346
+   (3070692208) calling ACE_Reactor_Token_T::sleep_hook in file `/usr/local/include/ace/Reactor_Token_T.cpp' on line 63
+      (3070692208) calling ACE_Select_Reactor_T::notify in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 207
+      (3070692208) leaving ACE_Select_Reactor_T::notify
+   (3070692208) leaving ACE_Reactor_Token_T::sleep_hook
+   (3079084912) leaving ACE_Select_Reactor_T::wait_for_multiple_events
+   (3079084912) calling ACE_Select_Reactor_T::dispatch in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1278
+      (3079084912) calling ACE_Timer_Heap_T::is_empty in file `/usr/local/include/ace/Timer_Heap_T.cpp' on line 315
+      (3079084912) leaving ACE_Timer_Heap_T::is_empty
+      (3079084912) calling ACE_Select_Reactor_T::renew in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 195
+   (3070692208) calling ACE_Select_Reactor_T::remove_handler_i in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1004
+      (3070692208) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+         (3070692208) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+         (3070692208) leaving ACE_Handle_Set::is_set
+      (3070692208) leaving ACE_Handle_Set::clr_bit
+      (3070692208) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+         (3070692208) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+         (3070692208) leaving ACE_Handle_Set::is_set
+      (3070692208) leaving ACE_Handle_Set::clr_bit
+   (3070692208) leaving ACE_Select_Reactor_T::remove_handler_i
+(3070692208) leaving ACE_Select_Reactor_T::remove_handler
+      (3079084912) leaving ACE_Select_Reactor_T::renew
+      (3079084912) calling ACE_Select_Reactor_T::dispatch_io_handlers in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1228
+         (3079084912) calling ACE_Select_Reactor_T::dispatch_io_set in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1190
+         (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_set
+         (3079084912) calling ACE_Select_Reactor_T::dispatch_io_set in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1190
+         (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_set
+         (3079084912) calling ACE_Select_Reactor_T::dispatch_io_set in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1190
+         (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_set
+      (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_handlers
+      (3079084912) calling ACE_Select_Reactor_T::any_ready in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 47
+         (3079084912) calling ACE_Sig_Set::ACE_Sig_Set in file `/usr/local/include/ace/Signal.inl' on line 30
+         (3079084912) leaving ACE_Sig_Set::ACE_Sig_Set
+         (3079084912) calling ACE_Sig_Set::operator sigset_t * in file `/usr/local/include/ace/Signal.inl' on line 88
+         (3079084912) leaving ACE_Sig_Set::operator sigset_t *
+         (3079084912) calling ACE_Select_Reactor_T::any_ready_i in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 65
+            (3079084912) calling ACE_Handle_Set::num_set in file `/usr/local/include/ace/Handle_Set.inl' on line 154
+            (3079084912) leaving ACE_Handle_Set::num_set
+            (3079084912) calling ACE_Handle_Set::num_set in file `/usr/local/include/ace/Handle_Set.inl' on line 154
+            (3079084912) leaving ACE_Handle_Set::num_set
+            (3079084912) calling ACE_Handle_Set::num_set in file `/usr/local/include/ace/Handle_Set.inl' on line 154
+            (3079084912) leaving ACE_Handle_Set::num_set
+         (3079084912) leaving ACE_Select_Reactor_T::any_ready_i
+      (3079084912) leaving ACE_Select_Reactor_T::any_ready
+   (3079084912) leaving ACE_Select_Reactor_T::dispatch
+(3079084912) leaving ACE_Select_Reactor_T::handle_events
+(3079084912) handle_events() succeed, result = 1
+
+(3079084912) calling ACE_Select_Reactor_T::handle_events in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1397
+   (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+   (3079084912) leaving ACE_Handle_Set::reset
+   (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+   (3079084912) leaving ACE_Handle_Set::reset
+   (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+   (3079084912) leaving ACE_Handle_Set::reset
+   (3079084912) calling ACE_Select_Reactor_T::wait_for_multiple_events in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1069
+      (3079084912) calling ACE_Select_Reactor_T::any_ready in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 47
+         (3079084912) calling ACE_Sig_Set::ACE_Sig_Set in file `/usr/local/include/ace/Signal.inl' on line 30
+         (3079084912) leaving ACE_Sig_Set::ACE_Sig_Set
+         (3079084912) calling ACE_Sig_Set::operator sigset_t * in file `/usr/local/include/ace/Signal.inl' on line 88
+         (3079084912) leaving ACE_Sig_Set::operator sigset_t *
+         (3079084912) calling ACE_Select_Reactor_T::any_ready_i in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 65
+            (3079084912) calling ACE_Handle_Set::num_set in file `/usr/local/include/ace/Handle_Set.inl' on line 154
+            (3079084912) leaving ACE_Handle_Set::num_set
+            (3079084912) calling ACE_Handle_Set::num_set in file `/usr/local/include/ace/Handle_Set.inl' on line 154
+            (3079084912) leaving ACE_Handle_Set::num_set
+            (3079084912) calling ACE_Handle_Set::num_set in file `/usr/local/include/ace/Handle_Set.inl' on line 154
+            (3079084912) leaving ACE_Handle_Set::num_set
+         (3079084912) leaving ACE_Select_Reactor_T::any_ready_i
+      (3079084912) leaving ACE_Select_Reactor_T::any_ready
+      (3079084912) calling ACE_Timer_Queue_T::calculate_timeout in file `/usr/local/include/ace/Timer_Queue_T.cpp' on line 116
+         (3079084912) calling ACE_Timer_Heap_T::is_empty in file `/usr/local/include/ace/Timer_Heap_T.cpp' on line 315
+         (3079084912) leaving ACE_Timer_Heap_T::is_empty
+      (3079084912) leaving ACE_Timer_Queue_T::calculate_timeout
+      (3079084912) calling ACE_Handle_Set::operator = in file `/usr/local/include/ace/Handle_Set.inl' on line 48
+      (3079084912) leaving ACE_Handle_Set::operator =
+      (3079084912) calling ACE_Handle_Set::operator = in file `/usr/local/include/ace/Handle_Set.inl' on line 48
+         (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+         (3079084912) leaving ACE_Handle_Set::reset
+      (3079084912) leaving ACE_Handle_Set::operator =
+      (3079084912) calling ACE_Handle_Set::operator = in file `/usr/local/include/ace/Handle_Set.inl' on line 48
+         (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+         (3079084912) leaving ACE_Handle_Set::reset
+      (3079084912) leaving ACE_Handle_Set::operator =
+      (3079084912) calling ACE_Handle_Set::operator fd_set * in file `/usr/local/include/ace/Handle_Set.inl' on line 167
+      (3079084912) leaving ACE_Handle_Set::operator fd_set *
+      (3079084912) calling ACE_Handle_Set::operator fd_set * in file `/usr/local/include/ace/Handle_Set.inl' on line 167
+      (3079084912) leaving ACE_Handle_Set::operator fd_set *
+      (3079084912) calling ACE_Handle_Set::operator fd_set * in file `/usr/local/include/ace/Handle_Set.inl' on line 167
+      (3079084912) leaving ACE_Handle_Set::operator fd_set *
+(3070692208) MyTask2::svc() register exit handler
+(3070692208) calling ACE_Select_Reactor_T::register_handler in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 285
+   (3070692208) calling ACE_Reactor_Token_T::sleep_hook in file `/usr/local/include/ace/Reactor_Token_T.cpp' on line 63
+      (3070692208) calling ACE_Select_Reactor_T::notify in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 207
+      (3070692208) leaving ACE_Select_Reactor_T::notify
+   (3070692208) leaving ACE_Reactor_Token_T::sleep_hook
+   (3079084912) leaving ACE_Select_Reactor_T::wait_for_multiple_events
+   (3079084912) calling ACE_Select_Reactor_T::dispatch in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1278
+      (3079084912) calling ACE_Timer_Heap_T::is_empty in file `/usr/local/include/ace/Timer_Heap_T.cpp' on line 315
+      (3079084912) leaving ACE_Timer_Heap_T::is_empty
+      (3079084912) calling ACE_Select_Reactor_T::renew in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 195
+   (3070692208) calling ACE_Select_Reactor_T::register_handler_i in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 992
+      (3070692208) calling ACE_Select_Reactor_T::is_suspended_i in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 974
+         (3070692208) calling ACE_Select_Reactor_Handler_Repository::find in file `/usr/local/include/ace/Select_Reactor_Base.inl' on line 46
+         (3070692208) leaving ACE_Select_Reactor_Handler_Repository::find
+         (3070692208) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+         (3070692208) leaving ACE_Handle_Set::is_set
+         (3070692208) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+         (3070692208) leaving ACE_Handle_Set::is_set
+         (3070692208) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+         (3070692208) leaving ACE_Handle_Set::is_set
+      (3070692208) leaving ACE_Select_Reactor_T::is_suspended_i
+      (3070692208) calling ACE_Handle_Set::set_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 101
+         (3070692208) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+         (3070692208) leaving ACE_Handle_Set::is_set
+      (3070692208) leaving ACE_Handle_Set::set_bit
+   (3070692208) leaving ACE_Select_Reactor_T::register_handler_i
+(3070692208) leaving ACE_Select_Reactor_T::register_handler
+      (3079084912) leaving ACE_Select_Reactor_T::renew
+      (3079084912) calling ACE_Select_Reactor_T::dispatch_io_handlers in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1228
+         (3079084912) calling ACE_Select_Reactor_T::dispatch_io_set in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1190
+         (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_set
+         (3079084912) calling ACE_Select_Reactor_T::dispatch_io_set in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1190
+         (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_set
+         (3079084912) calling ACE_Select_Reactor_T::dispatch_io_set in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1190
+         (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_set
+      (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_handlers
+   (3079084912) leaving ACE_Select_Reactor_T::dispatch
+(3079084912) leaving ACE_Select_Reactor_T::handle_events
+(3079084912) handle_events() succeed, result = 1
+
+(3079084912) calling ACE_Select_Reactor_T::handle_events in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1397
+   (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+   (3079084912) leaving ACE_Handle_Set::reset
+   (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+   (3079084912) leaving ACE_Handle_Set::reset
+   (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+   (3079084912) leaving ACE_Handle_Set::reset
+   (3079084912) calling ACE_Select_Reactor_T::wait_for_multiple_events in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1069
+      (3079084912) calling ACE_Select_Reactor_T::any_ready in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 47
+         (3079084912) calling ACE_Sig_Set::ACE_Sig_Set in file `/usr/local/include/ace/Signal.inl' on line 30
+         (3079084912) leaving ACE_Sig_Set::ACE_Sig_Set
+         (3079084912) calling ACE_Sig_Set::operator sigset_t * in file `/usr/local/include/ace/Signal.inl' on line 88
+         (3079084912) leaving ACE_Sig_Set::operator sigset_t *
+         (3079084912) calling ACE_Select_Reactor_T::any_ready_i in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 65
+            (3079084912) calling ACE_Handle_Set::num_set in file `/usr/local/include/ace/Handle_Set.inl' on line 154
+            (3079084912) leaving ACE_Handle_Set::num_set
+            (3079084912) calling ACE_Handle_Set::num_set in file `/usr/local/include/ace/Handle_Set.inl' on line 154
+            (3079084912) leaving ACE_Handle_Set::num_set
+            (3079084912) calling ACE_Handle_Set::num_set in file `/usr/local/include/ace/Handle_Set.inl' on line 154
+            (3079084912) leaving ACE_Handle_Set::num_set
+         (3079084912) leaving ACE_Select_Reactor_T::any_ready_i
+      (3079084912) leaving ACE_Select_Reactor_T::any_ready
+      (3079084912) calling ACE_Timer_Queue_T::calculate_timeout in file `/usr/local/include/ace/Timer_Queue_T.cpp' on line 116
+         (3079084912) calling ACE_Timer_Heap_T::is_empty in file `/usr/local/include/ace/Timer_Heap_T.cpp' on line 315
+         (3079084912) leaving ACE_Timer_Heap_T::is_empty
+      (3079084912) leaving ACE_Timer_Queue_T::calculate_timeout
+      (3079084912) calling ACE_Handle_Set::operator = in file `/usr/local/include/ace/Handle_Set.inl' on line 48
+      (3079084912) leaving ACE_Handle_Set::operator =
+      (3079084912) calling ACE_Handle_Set::operator = in file `/usr/local/include/ace/Handle_Set.inl' on line 48
+         (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+         (3079084912) leaving ACE_Handle_Set::reset
+      (3079084912) leaving ACE_Handle_Set::operator =
+      (3079084912) calling ACE_Handle_Set::operator = in file `/usr/local/include/ace/Handle_Set.inl' on line 48
+      (3079084912) leaving ACE_Handle_Set::operator =
+      (3079084912) calling ACE_Handle_Set::operator fd_set * in file `/usr/local/include/ace/Handle_Set.inl' on line 167
+      (3079084912) leaving ACE_Handle_Set::operator fd_set *
+      (3079084912) calling ACE_Handle_Set::operator fd_set * in file `/usr/local/include/ace/Handle_Set.inl' on line 167
+      (3079084912) leaving ACE_Handle_Set::operator fd_set *
+      (3079084912) calling ACE_Handle_Set::operator fd_set * in file `/usr/local/include/ace/Handle_Set.inl' on line 167
+      (3079084912) leaving ACE_Handle_Set::operator fd_set *
+(3070692208) MyTask2::svc() remove exit handler
+
+(3070692208) calling ACE_Select_Reactor_T::remove_handler in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 346
+   (3070692208) calling ACE_Reactor_Token_T::sleep_hook in file `/usr/local/include/ace/Reactor_Token_T.cpp' on line 63
+      (3070692208) calling ACE_Select_Reactor_T::notify in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 207
+      (3070692208) leaving ACE_Select_Reactor_T::notify
+   (3070692208) leaving ACE_Reactor_Token_T::sleep_hook
+   (3079084912) leaving ACE_Select_Reactor_T::wait_for_multiple_events
+   (3079084912) calling ACE_Select_Reactor_T::dispatch in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1278
+      (3079084912) calling ACE_Timer_Heap_T::is_empty in file `/usr/local/include/ace/Timer_Heap_T.cpp' on line 315
+      (3079084912) leaving ACE_Timer_Heap_T::is_empty
+      (3079084912) calling ACE_Select_Reactor_T::renew in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 195
+   (3070692208) calling ACE_Select_Reactor_T::remove_handler_i in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1004
+      (3070692208) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+         (3070692208) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+         (3070692208) leaving ACE_Handle_Set::is_set
+      (3070692208) leaving ACE_Handle_Set::clr_bit
+      (3070692208) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+         (3070692208) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+         (3070692208) leaving ACE_Handle_Set::is_set
+      (3070692208) leaving ACE_Handle_Set::clr_bit
+   (3070692208) leaving ACE_Select_Reactor_T::remove_handler_i
+(3070692208) leaving ACE_Select_Reactor_T::remove_handler
+      (3079084912) leaving ACE_Select_Reactor_T::renew
+      (3079084912) calling ACE_Select_Reactor_T::dispatch_io_handlers in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1228
+         (3079084912) calling ACE_Select_Reactor_T::dispatch_io_set in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1190
+         (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_set
+         (3079084912) calling ACE_Select_Reactor_T::dispatch_io_set in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1190
+         (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_set
+         (3079084912) calling ACE_Select_Reactor_T::dispatch_io_set in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1190
+         (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_set
+      (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_handlers
+      (3079084912) calling ACE_Select_Reactor_T::any_ready in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 47
+         (3079084912) calling ACE_Sig_Set::ACE_Sig_Set in file `/usr/local/include/ace/Signal.inl' on line 30
+         (3079084912) leaving ACE_Sig_Set::ACE_Sig_Set
+         (3079084912) calling ACE_Sig_Set::operator sigset_t * in file `/usr/local/include/ace/Signal.inl' on line 88
+         (3079084912) leaving ACE_Sig_Set::operator sigset_t *
+         (3079084912) calling ACE_Select_Reactor_T::any_ready_i in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 65
+            (3079084912) calling ACE_Handle_Set::num_set in file `/usr/local/include/ace/Handle_Set.inl' on line 154
+            (3079084912) leaving ACE_Handle_Set::num_set
+            (3079084912) calling ACE_Handle_Set::num_set in file `/usr/local/include/ace/Handle_Set.inl' on line 154
+            (3079084912) leaving ACE_Handle_Set::num_set
+            (3079084912) calling ACE_Handle_Set::num_set in file `/usr/local/include/ace/Handle_Set.inl' on line 154
+            (3079084912) leaving ACE_Handle_Set::num_set
+         (3079084912) leaving ACE_Select_Reactor_T::any_ready_i
+      (3079084912) leaving ACE_Select_Reactor_T::any_ready
+   (3079084912) leaving ACE_Select_Reactor_T::dispatch
+(3079084912) leaving ACE_Select_Reactor_T::handle_events
+(3079084912) handle_events() succeed, result = 1
+
+(3079084912) calling ACE_Select_Reactor_T::handle_events in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1397
+   (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+   (3079084912) leaving ACE_Handle_Set::reset
+   (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+   (3079084912) leaving ACE_Handle_Set::reset
+   (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+   (3079084912) leaving ACE_Handle_Set::reset
+   (3079084912) calling ACE_Select_Reactor_T::wait_for_multiple_events in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1069
+      (3079084912) calling ACE_Select_Reactor_T::any_ready in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 47
+         (3079084912) calling ACE_Sig_Set::ACE_Sig_Set in file `/usr/local/include/ace/Signal.inl' on line 30
+         (3079084912) leaving ACE_Sig_Set::ACE_Sig_Set
+         (3079084912) calling ACE_Sig_Set::operator sigset_t * in file `/usr/local/include/ace/Signal.inl' on line 88
+         (3079084912) leaving ACE_Sig_Set::operator sigset_t *
+         (3079084912) calling ACE_Select_Reactor_T::any_ready_i in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 65
+            (3079084912) calling ACE_Handle_Set::num_set in file `/usr/local/include/ace/Handle_Set.inl' on line 154
+            (3079084912) leaving ACE_Handle_Set::num_set
+            (3079084912) calling ACE_Handle_Set::num_set in file `/usr/local/include/ace/Handle_Set.inl' on line 154
+            (3079084912) leaving ACE_Handle_Set::num_set
+            (3079084912) calling ACE_Handle_Set::num_set in file `/usr/local/include/ace/Handle_Set.inl' on line 154
+            (3079084912) leaving ACE_Handle_Set::num_set
+         (3079084912) leaving ACE_Select_Reactor_T::any_ready_i
+      (3079084912) leaving ACE_Select_Reactor_T::any_ready
+      (3079084912) calling ACE_Timer_Queue_T::calculate_timeout in file `/usr/local/include/ace/Timer_Queue_T.cpp' on line 116
+         (3079084912) calling ACE_Timer_Heap_T::is_empty in file `/usr/local/include/ace/Timer_Heap_T.cpp' on line 315
+         (3079084912) leaving ACE_Timer_Heap_T::is_empty
+      (3079084912) leaving ACE_Timer_Queue_T::calculate_timeout
+      (3079084912) calling ACE_Handle_Set::operator = in file `/usr/local/include/ace/Handle_Set.inl' on line 48
+      (3079084912) leaving ACE_Handle_Set::operator =
+      (3079084912) calling ACE_Handle_Set::operator = in file `/usr/local/include/ace/Handle_Set.inl' on line 48
+         (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+         (3079084912) leaving ACE_Handle_Set::reset
+      (3079084912) leaving ACE_Handle_Set::operator =
+      (3079084912) calling ACE_Handle_Set::operator = in file `/usr/local/include/ace/Handle_Set.inl' on line 48
+         (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+         (3079084912) leaving ACE_Handle_Set::reset
+      (3079084912) leaving ACE_Handle_Set::operator =
+      (3079084912) calling ACE_Handle_Set::operator fd_set * in file `/usr/local/include/ace/Handle_Set.inl' on line 167
+      (3079084912) leaving ACE_Handle_Set::operator fd_set *
+      (3079084912) calling ACE_Handle_Set::operator fd_set * in file `/usr/local/include/ace/Handle_Set.inl' on line 167
+      (3079084912) leaving ACE_Handle_Set::operator fd_set *
+      (3079084912) calling ACE_Handle_Set::operator fd_set * in file `/usr/local/include/ace/Handle_Set.inl' on line 167
+      (3079084912) leaving ACE_Handle_Set::operator fd_set *
+(3070692208) exit MyTask2::svc()
+
+   (3079084912) leaving ACE_Select_Reactor_T::wait_for_multiple_events
+   (3079084912) calling ACE_Select_Reactor_T::dispatch in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1278
+      (3079084912) calling ACE_Timer_Heap_T::is_empty in file `/usr/local/include/ace/Timer_Heap_T.cpp' on line 315
+      (3079084912) leaving ACE_Timer_Heap_T::is_empty
+      (3079084912) calling ACE_Select_Reactor_T::dispatch_io_handlers in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1228
+         (3079084912) calling ACE_Select_Reactor_T::dispatch_io_set in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1190
+         (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_set
+         (3079084912) calling ACE_Select_Reactor_T::dispatch_io_set in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1190
+         (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_set
+         (3079084912) calling ACE_Select_Reactor_T::dispatch_io_set in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1190
+            (3079084912) calling ACE_Select_Reactor_Handler_Repository::find in file `/usr/local/include/ace/Select_Reactor_Base.inl' on line 46
+            (3079084912) leaving ACE_Select_Reactor_Handler_Repository::find
+            (3079084912) calling ACE_Select_Reactor_T::notify_handle in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 797
+               (3079084912) calling ACE_SOCK_Dgram::recv in file `/usr/local/include/ace/SOCK_Dgram.inl' on line 52
+                  (3079084912) calling ACE_IPC_SAP::get_handle in file `/usr/local/include/ace/IPC_SAP.inl' on line 18
+                  (3079084912) leaving ACE_IPC_SAP::get_handle
+               (3079084912) leaving ACE_SOCK_Dgram::recv
+               (3079084912) calling ACE_INET_Addr::get_port_number in file `/usr/local/include/ace/INET_Addr.inl' on line 90
+               (3079084912) leaving ACE_INET_Addr::get_port_number
+recv: No. = 1, host = localhost, IP = 7f000001, port = 52495, bytes = 21
+      data = a ACE_SOCK_Dgram test
+               (3079084912) calling ACE_SOCK_Dgram::send in file `/usr/local/include/ace/SOCK_Dgram.inl' on line 33
+                  (3079084912) calling ACE_IPC_SAP::get_handle in file `/usr/local/include/ace/IPC_SAP.inl' on line 18
+                  (3079084912) leaving ACE_IPC_SAP::get_handle
+               (3079084912) leaving ACE_SOCK_Dgram::send
+            (3079084912) leaving ACE_Select_Reactor_T::notify_handle
+         (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_set
+      (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_handlers
+   (3079084912) leaving ACE_Select_Reactor_T::dispatch
+(3079084912) leaving ACE_Select_Reactor_T::handle_events
+(3079084912) handle_events() succeed, result = 1
+
+(3079084912) calling ACE_Select_Reactor_T::handle_events in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1397
+   (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+   (3079084912) leaving ACE_Handle_Set::reset
+   (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+   (3079084912) leaving ACE_Handle_Set::reset
+   (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+   (3079084912) leaving ACE_Handle_Set::reset
+   (3079084912) calling ACE_Select_Reactor_T::wait_for_multiple_events in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1069
+      (3079084912) calling ACE_Select_Reactor_T::any_ready in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 47
+         (3079084912) calling ACE_Sig_Set::ACE_Sig_Set in file `/usr/local/include/ace/Signal.inl' on line 30
+         (3079084912) leaving ACE_Sig_Set::ACE_Sig_Set
+         (3079084912) calling ACE_Sig_Set::operator sigset_t * in file `/usr/local/include/ace/Signal.inl' on line 88
+         (3079084912) leaving ACE_Sig_Set::operator sigset_t *
+         (3079084912) calling ACE_Select_Reactor_T::any_ready_i in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 65
+            (3079084912) calling ACE_Handle_Set::num_set in file `/usr/local/include/ace/Handle_Set.inl' on line 154
+            (3079084912) leaving ACE_Handle_Set::num_set
+            (3079084912) calling ACE_Handle_Set::num_set in file `/usr/local/include/ace/Handle_Set.inl' on line 154
+            (3079084912) leaving ACE_Handle_Set::num_set
+            (3079084912) calling ACE_Handle_Set::num_set in file `/usr/local/include/ace/Handle_Set.inl' on line 154
+            (3079084912) leaving ACE_Handle_Set::num_set
+         (3079084912) leaving ACE_Select_Reactor_T::any_ready_i
+      (3079084912) leaving ACE_Select_Reactor_T::any_ready
+      (3079084912) calling ACE_Timer_Queue_T::calculate_timeout in file `/usr/local/include/ace/Timer_Queue_T.cpp' on line 116
+         (3079084912) calling ACE_Timer_Heap_T::is_empty in file `/usr/local/include/ace/Timer_Heap_T.cpp' on line 315
+         (3079084912) leaving ACE_Timer_Heap_T::is_empty
+      (3079084912) leaving ACE_Timer_Queue_T::calculate_timeout
+      (3079084912) calling ACE_Handle_Set::operator = in file `/usr/local/include/ace/Handle_Set.inl' on line 48
+      (3079084912) leaving ACE_Handle_Set::operator =
+      (3079084912) calling ACE_Handle_Set::operator = in file `/usr/local/include/ace/Handle_Set.inl' on line 48
+         (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+         (3079084912) leaving ACE_Handle_Set::reset
+      (3079084912) leaving ACE_Handle_Set::operator =
+      (3079084912) calling ACE_Handle_Set::operator = in file `/usr/local/include/ace/Handle_Set.inl' on line 48
+         (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+         (3079084912) leaving ACE_Handle_Set::reset
+      (3079084912) leaving ACE_Handle_Set::operator =
+      (3079084912) calling ACE_Handle_Set::operator fd_set * in file `/usr/local/include/ace/Handle_Set.inl' on line 167
+      (3079084912) leaving ACE_Handle_Set::operator fd_set *
+      (3079084912) calling ACE_Handle_Set::operator fd_set * in file `/usr/local/include/ace/Handle_Set.inl' on line 167
+      (3079084912) leaving ACE_Handle_Set::operator fd_set *
+      (3079084912) calling ACE_Handle_Set::operator fd_set * in file `/usr/local/include/ace/Handle_Set.inl' on line 167
+      (3079084912) leaving ACE_Handle_Set::operator fd_set *
+   (3079084912) leaving ACE_Select_Reactor_T::wait_for_multiple_events
+   (3079084912) calling ACE_Select_Reactor_T::dispatch in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1278
+      (3079084912) calling ACE_Timer_Heap_T::is_empty in file `/usr/local/include/ace/Timer_Heap_T.cpp' on line 315
+      (3079084912) leaving ACE_Timer_Heap_T::is_empty
+      (3079084912) calling ACE_Select_Reactor_T::dispatch_io_handlers in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1228
+         (3079084912) calling ACE_Select_Reactor_T::dispatch_io_set in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1190
+         (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_set
+         (3079084912) calling ACE_Select_Reactor_T::dispatch_io_set in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1190
+         (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_set
+         (3079084912) calling ACE_Select_Reactor_T::dispatch_io_set in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1190
+            (3079084912) calling ACE_Select_Reactor_Handler_Repository::find in file `/usr/local/include/ace/Select_Reactor_Base.inl' on line 46
+            (3079084912) leaving ACE_Select_Reactor_Handler_Repository::find
+            (3079084912) calling ACE_Select_Reactor_T::notify_handle in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 797
+               (3079084912) calling ACE_SOCK_Dgram::recv in file `/usr/local/include/ace/SOCK_Dgram.inl' on line 52
+                  (3079084912) calling ACE_IPC_SAP::get_handle in file `/usr/local/include/ace/IPC_SAP.inl' on line 18
+                  (3079084912) leaving ACE_IPC_SAP::get_handle
+               (3079084912) leaving ACE_SOCK_Dgram::recv
+               (3079084912) calling ACE_INET_Addr::get_port_number in file `/usr/local/include/ace/INET_Addr.inl' on line 90
+               (3079084912) leaving ACE_INET_Addr::get_port_number
+recv: No. = 2, host = localhost, IP = 7f000001, port = 48817, bytes = 21
+      data = a ACE_SOCK_Dgram test
+               (3079084912) calling ACE_SOCK_Dgram::send in file `/usr/local/include/ace/SOCK_Dgram.inl' on line 33
+                  (3079084912) calling ACE_IPC_SAP::get_handle in file `/usr/local/include/ace/IPC_SAP.inl' on line 18
+                  (3079084912) leaving ACE_IPC_SAP::get_handle
+               (3079084912) leaving ACE_SOCK_Dgram::send
+            (3079084912) leaving ACE_Select_Reactor_T::notify_handle
+         (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_set
+      (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_handlers
+   (3079084912) leaving ACE_Select_Reactor_T::dispatch
+(3079084912) leaving ACE_Select_Reactor_T::handle_events
+(3079084912) handle_events() succeed, result = 1
+
+(3079084912) MyTask::svc() notify the exit handler
+(3079084912) calling ACE_Select_Reactor_T::notify in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 207
+(3079084912) leaving ACE_Select_Reactor_T::notify
+(3079084912) calling ACE_Select_Reactor_T::handle_events in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1397
+   (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+   (3079084912) leaving ACE_Handle_Set::reset
+   (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+   (3079084912) leaving ACE_Handle_Set::reset
+   (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+   (3079084912) leaving ACE_Handle_Set::reset
+   (3079084912) calling ACE_Select_Reactor_T::wait_for_multiple_events in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1069
+      (3079084912) calling ACE_Select_Reactor_T::any_ready in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 47
+         (3079084912) calling ACE_Sig_Set::ACE_Sig_Set in file `/usr/local/include/ace/Signal.inl' on line 30
+         (3079084912) leaving ACE_Sig_Set::ACE_Sig_Set
+         (3079084912) calling ACE_Sig_Set::operator sigset_t * in file `/usr/local/include/ace/Signal.inl' on line 88
+         (3079084912) leaving ACE_Sig_Set::operator sigset_t *
+         (3079084912) calling ACE_Select_Reactor_T::any_ready_i in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 65
+            (3079084912) calling ACE_Handle_Set::num_set in file `/usr/local/include/ace/Handle_Set.inl' on line 154
+            (3079084912) leaving ACE_Handle_Set::num_set
+            (3079084912) calling ACE_Handle_Set::num_set in file `/usr/local/include/ace/Handle_Set.inl' on line 154
+            (3079084912) leaving ACE_Handle_Set::num_set
+            (3079084912) calling ACE_Handle_Set::num_set in file `/usr/local/include/ace/Handle_Set.inl' on line 154
+            (3079084912) leaving ACE_Handle_Set::num_set
+         (3079084912) leaving ACE_Select_Reactor_T::any_ready_i
+      (3079084912) leaving ACE_Select_Reactor_T::any_ready
+      (3079084912) calling ACE_Timer_Queue_T::calculate_timeout in file `/usr/local/include/ace/Timer_Queue_T.cpp' on line 116
+         (3079084912) calling ACE_Timer_Heap_T::is_empty in file `/usr/local/include/ace/Timer_Heap_T.cpp' on line 315
+         (3079084912) leaving ACE_Timer_Heap_T::is_empty
+      (3079084912) leaving ACE_Timer_Queue_T::calculate_timeout
+      (3079084912) calling ACE_Handle_Set::operator = in file `/usr/local/include/ace/Handle_Set.inl' on line 48
+      (3079084912) leaving ACE_Handle_Set::operator =
+      (3079084912) calling ACE_Handle_Set::operator = in file `/usr/local/include/ace/Handle_Set.inl' on line 48
+         (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+         (3079084912) leaving ACE_Handle_Set::reset
+      (3079084912) leaving ACE_Handle_Set::operator =
+      (3079084912) calling ACE_Handle_Set::operator = in file `/usr/local/include/ace/Handle_Set.inl' on line 48
+         (3079084912) calling ACE_Handle_Set::reset in file `/usr/local/include/ace/Handle_Set.inl' on line 31
+         (3079084912) leaving ACE_Handle_Set::reset
+      (3079084912) leaving ACE_Handle_Set::operator =
+      (3079084912) calling ACE_Handle_Set::operator fd_set * in file `/usr/local/include/ace/Handle_Set.inl' on line 167
+      (3079084912) leaving ACE_Handle_Set::operator fd_set *
+      (3079084912) calling ACE_Handle_Set::operator fd_set * in file `/usr/local/include/ace/Handle_Set.inl' on line 167
+      (3079084912) leaving ACE_Handle_Set::operator fd_set *
+      (3079084912) calling ACE_Handle_Set::operator fd_set * in file `/usr/local/include/ace/Handle_Set.inl' on line 167
+      (3079084912) leaving ACE_Handle_Set::operator fd_set *
+   (3079084912) leaving ACE_Select_Reactor_T::wait_for_multiple_events
+   (3079084912) calling ACE_Select_Reactor_T::dispatch in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1278
+      (3079084912) calling ACE_Timer_Heap_T::is_empty in file `/usr/local/include/ace/Timer_Heap_T.cpp' on line 315
+      (3079084912) leaving ACE_Timer_Heap_T::is_empty
+(3079084912) handle_exception: handle the exit handler
+      (3079084912) calling ACE_Select_Reactor_T::renew in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 195
+      (3079084912) leaving ACE_Select_Reactor_T::renew
+      (3079084912) calling ACE_Select_Reactor_T::dispatch_io_handlers in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1228
+         (3079084912) calling ACE_Select_Reactor_T::dispatch_io_set in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1190
+         (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_set
+         (3079084912) calling ACE_Select_Reactor_T::dispatch_io_set in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1190
+         (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_set
+         (3079084912) calling ACE_Select_Reactor_T::dispatch_io_set in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1190
+         (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_set
+      (3079084912) leaving ACE_Select_Reactor_T::dispatch_io_handlers
+   (3079084912) leaving ACE_Select_Reactor_T::dispatch
+(3079084912) leaving ACE_Select_Reactor_T::handle_events
+(3079084912) handle_events() succeed, result = 1
+
+(3079084912) calling ACE_Select_Reactor_T::remove_handler in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 336
+   (3079084912) calling ACE_IPC_SAP::get_handle in file `/usr/local/include/ace/IPC_SAP.inl' on line 18
+   (3079084912) leaving ACE_IPC_SAP::get_handle
+   (3079084912) calling ACE_Select_Reactor_T::remove_handler_i in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 1004
+      (3079084912) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+         (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+         (3079084912) leaving ACE_Handle_Set::is_set
+      (3079084912) leaving ACE_Handle_Set::clr_bit
+      (3079084912) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+         (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+         (3079084912) leaving ACE_Handle_Set::is_set
+      (3079084912) leaving ACE_Handle_Set::clr_bit
+   (3079084912) leaving ACE_Select_Reactor_T::remove_handler_i
+(3079084912) leaving ACE_Select_Reactor_T::remove_handler
+(3079084912) exit MyTask::svc()
+
+(3079084912) calling ACE_Task<ACE_SYNCH_USE>::~ACE_Task in file `/usr/local/include/ace/Task_T.cpp' on line 70
+   (3079084912) calling ACE_Message_Queue<ACE_SYNCH_USE>::~ACE_Message_Queue in file `/usr/local/include/ace/Message_Queue_T.cpp' on line 940
+   (3079084912) leaving ACE_Message_Queue<ACE_SYNCH_USE>::~ACE_Message_Queue
+(3079084912) leaving ACE_Task<ACE_SYNCH_USE>::~ACE_Task
+(3079084912) in MyTask::close() 1
+(3079084912) calling ACE_Select_Reactor_T::close in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 559
+   (3079084912) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+      (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+      (3079084912) leaving ACE_Handle_Set::is_set
+   (3079084912) leaving ACE_Handle_Set::clr_bit
+   (3079084912) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+      (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+      (3079084912) leaving ACE_Handle_Set::is_set
+   (3079084912) leaving ACE_Handle_Set::clr_bit
+   (3079084912) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+      (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+      (3079084912) leaving ACE_Handle_Set::is_set
+   (3079084912) leaving ACE_Handle_Set::clr_bit
+   (3079084912) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+      (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+      (3079084912) leaving ACE_Handle_Set::is_set
+   (3079084912) leaving ACE_Handle_Set::clr_bit
+   (3079084912) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+      (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+      (3079084912) leaving ACE_Handle_Set::is_set
+   (3079084912) leaving ACE_Handle_Set::clr_bit
+   (3079084912) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+      (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+      (3079084912) leaving ACE_Handle_Set::is_set
+   (3079084912) leaving ACE_Handle_Set::clr_bit
+   (3079084912) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+      (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+      (3079084912) leaving ACE_Handle_Set::is_set
+   (3079084912) leaving ACE_Handle_Set::clr_bit
+   (3079084912) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+      (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+      (3079084912) leaving ACE_Handle_Set::is_set
+   (3079084912) leaving ACE_Handle_Set::clr_bit
+   (3079084912) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+      (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+      (3079084912) leaving ACE_Handle_Set::is_set
+   (3079084912) leaving ACE_Handle_Set::clr_bit
+   (3079084912) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+      (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+      (3079084912) leaving ACE_Handle_Set::is_set
+   (3079084912) leaving ACE_Handle_Set::clr_bit
+   (3079084912) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+      (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+      (3079084912) leaving ACE_Handle_Set::is_set
+   (3079084912) leaving ACE_Handle_Set::clr_bit
+   (3079084912) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+      (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+      (3079084912) leaving ACE_Handle_Set::is_set
+   (3079084912) leaving ACE_Handle_Set::clr_bit
+   (3079084912) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+      (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+      (3079084912) leaving ACE_Handle_Set::is_set
+   (3079084912) leaving ACE_Handle_Set::clr_bit
+   (3079084912) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+      (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+      (3079084912) leaving ACE_Handle_Set::is_set
+   (3079084912) leaving ACE_Handle_Set::clr_bit
+   (3079084912) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+      (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+      (3079084912) leaving ACE_Handle_Set::is_set
+   (3079084912) leaving ACE_Handle_Set::clr_bit
+   (3079084912) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+      (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+      (3079084912) leaving ACE_Handle_Set::is_set
+   (3079084912) leaving ACE_Handle_Set::clr_bit
+   (3079084912) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+      (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+      (3079084912) leaving ACE_Handle_Set::is_set
+   (3079084912) leaving ACE_Handle_Set::clr_bit
+   (3079084912) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+      (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+      (3079084912) leaving ACE_Handle_Set::is_set
+   (3079084912) leaving ACE_Handle_Set::clr_bit
+   (3079084912) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+      (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+      (3079084912) leaving ACE_Handle_Set::is_set
+   (3079084912) leaving ACE_Handle_Set::clr_bit
+   (3079084912) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+      (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+      (3079084912) leaving ACE_Handle_Set::is_set
+   (3079084912) leaving ACE_Handle_Set::clr_bit
+   (3079084912) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+      (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+      (3079084912) leaving ACE_Handle_Set::is_set
+   (3079084912) leaving ACE_Handle_Set::clr_bit
+   (3079084912) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+      (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+      (3079084912) leaving ACE_Handle_Set::is_set
+   (3079084912) leaving ACE_Handle_Set::clr_bit
+   (3079084912) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+      (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+      (3079084912) leaving ACE_Handle_Set::is_set
+   (3079084912) leaving ACE_Handle_Set::clr_bit
+   (3079084912) calling ACE_Handle_Set::clr_bit in file `/usr/local/include/ace/Handle_Set.inl' on line 133
+      (3079084912) calling ACE_Handle_Set::is_set in file `/usr/local/include/ace/Handle_Set.inl' on line 82
+      (3079084912) leaving ACE_Handle_Set::is_set
+   (3079084912) leaving ACE_Handle_Set::clr_bit
+   (3079084912) calling ACE_Timer_Heap_T::~ACE_Timer_Heap_T in file `/usr/local/include/ace/Timer_Heap_T.cpp' on line 205
+   (3079084912) leaving ACE_Timer_Heap_T::~ACE_Timer_Heap_T
+   (3079084912) calling ACE_Timer_Queue_T::~ACE_Timer_Queue_T in file `/usr/local/include/ace/Timer_Queue_T.cpp' on line 193
+   (3079084912) leaving ACE_Timer_Queue_T::~ACE_Timer_Queue_T
+(3079084912) leaving ACE_Select_Reactor_T::close
+(3079084912) in MyTask::close() 2
+(3079084912) calling ACE_Select_Reactor_T::~ACE_Select_Reactor_T in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 603
+   (3079084912) calling ACE_Select_Reactor_T::close in file `/usr/local/include/ace/Select_Reactor_T.cpp' on line 559
+   (3079084912) leaving ACE_Select_Reactor_T::close
+(3079084912) leaving ACE_Select_Reactor_T::~ACE_Select_Reactor_T
+(3079084912) calling ACE_Reactor_Token_T::~ACE_Reactor_Token_T in file `/usr/local/include/ace/Reactor_Token_T.cpp' on line 43
+(3079084912) leaving ACE_Reactor_Token_T::~ACE_Reactor_Token_T
+(3079084912) in MyTask::close() 3
+(3079084912) in ~Handler()
+(3079084912) calling ACE_SOCK_Dgram::~ACE_SOCK_Dgram in file `/usr/local/include/ace/SOCK_Dgram.inl' on line 22
+(3079084912) leaving ACE_SOCK_Dgram::~ACE_SOCK_Dgram
+(3079084912) in MyTask::close() 4
+$ input command >q
+(3079087824) in MyTask::~MyTask() 1
+(3079087824) calling ACE_Task<ACE_SYNCH_USE>::~ACE_Task in file `/usr/local/include/ace/Task_T.cpp' on line 70
+   (3079087824) calling ACE_Message_Queue<ACE_SYNCH_USE>::~ACE_Message_Queue in file `/usr/local/include/ace/Message_Queue_T.cpp' on line 940
+   (3079087824) leaving ACE_Message_Queue<ACE_SYNCH_USE>::~ACE_Message_Queue
+(3079087824) leaving ACE_Task<ACE_SYNCH_USE>::~ACE_Task

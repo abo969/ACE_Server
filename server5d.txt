@@ -1,0 +1,55 @@
+spawn ./server5d
+---------------------------------------------
+input command to test the program
+ s or S : start the talker (ACE Task)
+ q or Q : quit
+---------------------------------------------
+$ input command >s
+(3079149264) main::start
+(3079149264) calling ACE_Task<ACE_SYNCH_USE>::ACE_Task in file `/usr/local/include/ace/Task_T.cpp' on line 55
+   (3079149264) calling ACE_Message_Queue<ACE_SYNCH_USE>::ACE_Message_Queue in file `/usr/local/include/ace/Message_Queue_T.cpp' on line 930
+      (3079149264) calling ACE_Message_Queue<ACE_SYNCH_USE>::open in file `/usr/local/include/ace/Message_Queue_T.cpp' on line 986
+      (3079149264) leaving ACE_Message_Queue<ACE_SYNCH_USE>::open
+   (3079149264) leaving ACE_Message_Queue<ACE_SYNCH_USE>::ACE_Message_Queue
+(3079149264) leaving ACE_Task<ACE_SYNCH_USE>::ACE_Task
+(3079149264) calling ACE_SOCK_Dgram::ACE_SOCK_Dgram in file `/usr/local/include/ace/SOCK_Dgram.inl' on line 16
+(3079149264) leaving ACE_SOCK_Dgram::ACE_SOCK_Dgram
+(3079149264) in MyTask()
+
+(3079149264) calling ACE_SOCK_Dgram::~ACE_SOCK_Dgram in file `/usr/local/include/ace/SOCK_Dgram.inl' on line 22
+(3079149264) leaving ACE_SOCK_Dgram::~ACE_SOCK_Dgram
+(3079149264) MyTask start
+(3079146352) enter MyTask::svc()
+
+(3079146352) calling ACE_INET_Addr::get_port_number in file `/usr/local/include/ace/INET_Addr.inl' on line 90
+(3079146352) leaving ACE_INET_Addr::get_port_number
+recv: No. = 1, host = localhost, IP = 7f000001, port = 45162, bytes = 21
+      data = a ACE_SOCK_Dgram test
+
+(3079146352) calling ACE_SOCK_Dgram::send in file `/usr/local/include/ace/SOCK_Dgram.inl' on line 33
+   (3079146352) calling ACE_IPC_SAP::get_handle in file `/usr/local/include/ace/IPC_SAP.inl' on line 18
+   (3079146352) leaving ACE_IPC_SAP::get_handle
+(3079146352) leaving ACE_SOCK_Dgram::send
+(3079146352) calling ACE_INET_Addr::get_port_number in file `/usr/local/include/ace/INET_Addr.inl' on line 90
+(3079146352) leaving ACE_INET_Addr::get_port_number
+recv: No. = 2, host = localhost, IP = 7f000001, port = 52008, bytes = 21
+      data = a ACE_SOCK_Dgram test
+
+(3079146352) calling ACE_SOCK_Dgram::send in file `/usr/local/include/ace/SOCK_Dgram.inl' on line 33
+   (3079146352) calling ACE_IPC_SAP::get_handle in file `/usr/local/include/ace/IPC_SAP.inl' on line 18
+   (3079146352) leaving ACE_IPC_SAP::get_handle
+(3079146352) leaving ACE_SOCK_Dgram::send
+(3079146352) recv from socket timeout (10 seconds), result = -1
+
+(3079146352) exit MyTask::svc()
+
+(3079149264) in ~MyTask()
+(3079149264) calling ACE_SOCK_Dgram::~ACE_SOCK_Dgram in file `/usr/local/include/ace/SOCK_Dgram.inl' on line 22
+(3079149264) leaving ACE_SOCK_Dgram::~ACE_SOCK_Dgram
+(3079149264) calling ACE_Task<ACE_SYNCH_USE>::~ACE_Task in file `/usr/local/include/ace/Task_T.cpp' on line 70
+   (3079149264) calling ACE_Message_Queue<ACE_SYNCH_USE>::~ACE_Message_Queue in file `/usr/local/include/ace/Message_Queue_T.cpp' on line 940
+   (3079149264) leaving ACE_Message_Queue<ACE_SYNCH_USE>::~ACE_Message_Queue
+(3079149264) leaving ACE_Task<ACE_SYNCH_USE>::~ACE_Task
+(3079149264) main::end
+
+$ input command >

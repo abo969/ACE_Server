@@ -1,0 +1,25 @@
+spawn ./server3
+(3078059728) main::start
+(3078059728) MyTask start
+(3078056816) enter MyTask::svc()
+
+(3078056816) in Handler()
+
+recv: No. = 1, host = localhost, IP = 7f000001, port = 58769, bytes = 21
+      data = a ACE_SOCK_Dgram test
+(3078056816) handle_events(10) succeed, result = 1
+
+recv: No. = 2, host = localhost, IP = 7f000001, port = 59831, bytes = 21
+      data = a ACE_SOCK_Dgram test
+(3078056816) handle_events(10) succeed, result = 1
+
+(3078056816) handle_events(10) timeout, result = 0
+
+(3078056816) handle_events(10) succeed, result = 1
+
+(3078056816) exit MyTask::svc()
+
+(3078056816) in ~Handler()
+
+(3078059728) main::end
+

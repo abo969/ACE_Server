@@ -1,0 +1,268 @@
+ACE_Reactor_Mask为EXCEPT_MASK的notify发出的通知如何让handle_events调用自定义的handle_exception？
+
+调用notify发出的是通知消息，被送到ACE_Pipe的write端口，即通知到来，立即触发notification事件，激活在等待中的wait_for_multiple_events，然后进行事件分发，被派往dispatch_notification_handlers函数进行处理。
+更详细的内容，可参考ACE_Select_Reactor_T和ACE_Select_Reactor_Notify的源代码。
+
+1. the flow of calling the user-defined handle_exception
+
+->ACE_Reactor::handle_events
+ ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events
+  ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events_i
+   ->wait_for_multiple_events
+    ->...
+   ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch
+    ->ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch_notification_handlers
+     ->ACE_Select_Reactor_Notify::dispatch_notifications  //分发通知
+      ->ACE_Select_Reactor_Notify::handle_input  //分发通知前，先读取该通知内容
+       ->ACE_Select_Reactor_Notify::dispatch_notify  //读取通知后，真正地分发通知
+        ->Handler::handle_exception  //根据通知的mask，调用相应的handle_*（自定义的）
+
+
+2. debug analysis
+
+# gdb ./server99
+GNU gdb (GDB) 7.0-ubuntu
+Copyright (C) 2009 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "i486-linux-gnu".
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>...
+Reading symbols from /mnt/hgfs/programming/win32/Server/server99...done.
+(gdb) b MyTask::svc() 
+Breakpoint 1 at 0x8053395: file server99.cpp, line 153.
+(gdb) r
+Starting program: /mnt/hgfs/programming/win32/Server/server99 
+[Thread debugging using libthread_db enabled]
+---------------------------------------------
+input command to test the program
+ s or S : start the talker (ACE Task)
+ q or Q : quit
+---------------------------------------------
+$ input command >s
+(3086931664) main::start
+(3086931664) MyTask start
+[New Thread 0xb7fecb70 (LWP 4308)]
+[Switching to Thread 0xb7fecb70 (LWP 4308)]
+
+Breakpoint 1, MyTask::svc (this=0x806b774) at server99.cpp:153
+153     {
+(gdb) b 183
+Breakpoint 2 at 0x8053681: file server99.cpp, line 183.
+(gdb) c
+Continuing.
+(3086928752) enter MyTask::svc()
+
+(3086928752) in Handler()
+
+(3086928752) MyTask2 start
+[New Thread 0xb77ebb70 (LWP 4309)]
+(3078536048) enter MyTask2::svc()
+
+(3078536048) MyTask2::svc() register exit handler
+(3086928752) handle_events() succeed, result = 1
+
+(3078536048) MyTask2::svc() remove exit handler
+
+(3086928752) handle_events() succeed, result = 1
+
+(3078536048) MyTask2::svc() register exit handler
+(3086928752) handle_events() succeed, result = 1
+
+(3078536048) MyTask2::svc() remove exit handler
+
+(3086928752) handle_events() succeed, result = 1
+
+(3078536048) exit MyTask2::svc()
+
+[Thread 0xb77ebb70 (LWP 4309) exited]
+recv: No. = 1, host = localhost, IP = 7f000001, port = 41746, bytes = 21
+      data = a ACE_SOCK_Dgram test
+(3086928752) handle_events() succeed, result = 1
+
+recv: No. = 2, host = localhost, IP = 7f000001, port = 55808, bytes = 21
+      data = a ACE_SOCK_Dgram test
+(3086928752) handle_events() succeed, result = 1
+
+(3086928752) MyTask::svc() notify the exit handler
+
+Breakpoint 2, MyTask::svc (this=0x806b774) at server99.cpp:183
+183                     ACE_Reactor::instance()->notify(&handler, ACE_Event_Handler::EXCEPT_MASK);
+(gdb) bt
+#0  MyTask::svc (this=0x806b774) at server99.cpp:183
+#1  0x00213b52 in ACE_Task_Base::svc_run (args=0x806b774) at ../../ace/Task.cpp:275
+#2  0x00214eed in ACE_Thread_Adapter::invoke_i (this=0x806b9f0) at ../../ace/Thread_Adapter.cpp:149
+#3  0x00214f65 in ACE_Thread_Adapter::invoke (this=0x806b9f0) at ../../ace/Thread_Adapter.cpp:98
+#4  0x0018b5c1 in ace_thread_adapter (args=0x806b9f0) at ../../ace/Base_Thread_Adapter.cpp:124
+#5  0x0098a80e in start_thread () from /lib/tls/i686/cmov/libpthread.so.0
+#6  0x004ca7ee in clone () from /lib/tls/i686/cmov/libc.so.6
+(gdb) b ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch
+Breakpoint 3 at 0x805c7c4: file /usr/local/include/ace/Select_Reactor_T.cpp, line 1280.
+(gdb) b ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch_notification_handlers
+Breakpoint 4 at 0x805c978: file /usr/local/include/ace/Select_Reactor_T.cpp, line 1162.
+(gdb) b ACE_Select_Reactor_Notify::dispatch_notifications
+Breakpoint 5 at 0x37b7a0: file ../../ace/Select_Reactor_Base.cpp, line 739.
+(gdb) c
+Continuing.
+
+Breakpoint 3, ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch (this=0x806dba8, active_handle_count=1, dispatch_set=...)
+    at /usr/local/include/ace/Select_Reactor_T.cpp:1280
+1280      int io_handlers_dispatched = 0;
+(gdb) c
+Continuing.
+
+Breakpoint 4, ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch_notification_handlers (this=0x806dba8, dispatch_set=..., 
+    number_of_active_handles=@0xb7fec164, number_of_handlers_dispatched=@0xb7fec148) at /usr/local/include/ace/Select_Reactor_T.cpp:1162
+1162                                                       dispatch_set.rd_mask_);
+(gdb) c
+Continuing.
+
+Breakpoint 5, ACE_Select_Reactor_Notify::dispatch_notifications (this=0x806e4c8, number_of_active_handles=@0xb7fec164, rd_mask=...)
+    at ../../ace/Select_Reactor_Base.cpp:739
+739         this->notification_pipe_.read_handle ();
+(gdb) n
+741       if (read_handle != ACE_INVALID_HANDLE
+(gdb) p read_handle 
+$1 = 5
+(gdb) n
+744           --number_of_active_handles;
+(gdb) 
+745           rd_mask.clr_bit (read_handle);
+(gdb) 
+746           return this->handle_input (read_handle);
+(gdb) step
+ACE_Select_Reactor_Notify::handle_input (this=0x806e4c8, handle=5) at ../../ace/Select_Reactor_Base.cpp:917
+917       ACE_Notification_Buffer buffer;
+(gdb) n
+910     {
+(gdb) p *this
+$2 = {<ACE_Reactor_Notify> = {<ACE_Event_Handler> = {_vptr.ACE_Event_Handler = 0x3dec08, reference_count_ = {value_ = 1, 
+        static increment_fn_ = 0x30ac80 <multi_cpu_increment>, static decrement_fn_ = 0x30aca0 <multi_cpu_decrement>, 
+        static exchange_fn_ = 0x30acc0 <multi_cpu_exchange>, static exchange_add_fn_ = 0x30acd0 <multi_cpu_exchange_add>}, priority_ = 0, 
+      reactor_ = 0x0, reference_counting_policy_ = {<ACE_Event_Handler::Policy> = {_vptr.Policy = 0x3dd638}, 
+        value_ = ACE_Event_Handler::Reference_Counting_Policy::DISABLED}}, <No data fields>}, select_reactor_ = 0x806dba8, 
+  notification_pipe_ = {handles_ = {5, 6}}, max_notify_iterations_ = -1}
+(gdb) n
+917       ACE_Notification_Buffer buffer;
+(gdb) 
+919       while ((result = this->read_notify_pipe (handle, buffer)) > 0)
+(gdb) 
+923           if (this->dispatch_notify (buffer) > 0)
+(gdb) p buffer 
+$3 = {eh_ = 0xb7fec264, mask_ = 4}
+(gdb) p *(buffer.eh_)
+$4 = {_vptr.ACE_Event_Handler = 0x805ff08, reference_count_ = {value_ = 1, static increment_fn_ = 0x30ac80 <multi_cpu_increment>, 
+    static decrement_fn_ = 0x30aca0 <multi_cpu_decrement>, static exchange_fn_ = 0x30acc0 <multi_cpu_exchange>, 
+    static exchange_add_fn_ = 0x30acd0 <multi_cpu_exchange_add>}, priority_ = 0, reactor_ = 0x806f500, 
+  reference_counting_policy_ = {<ACE_Event_Handler::Policy> = {_vptr.Policy = 0x3dd638}, 
+    value_ = ACE_Event_Handler::Reference_Counting_Policy::DISABLED}}
+(gdb) step
+ACE_Select_Reactor_Notify::dispatch_notify (this=0x806e4c8, buffer=...) at ../../ace/Select_Reactor_Base.cpp:825
+825       if (buffer.eh_ != 0)
+(gdb) p buffer 
+$5 = (ACE_Notification_Buffer &) @0xb7fec088: {eh_ = 0xb7fec264, mask_ = 4}
+(gdb) n
+831             ACE_Event_Handler::Reference_Counting_Policy::ENABLED;
+(gdb) 
+833           switch (buffer.mask_)
+(gdb) 
+843               result = event_handler->handle_exception (ACE_INVALID_HANDLE);
+(gdb) p event_handler
+$6 = <value optimized out>
+(gdb) p *event_handler
+Cannot access memory at address 0x0
+(gdb) p *(buffer.eh_) 
+$7 = {_vptr.ACE_Event_Handler = 0x805ff08, reference_count_ = {value_ = 1, static increment_fn_ = 0x30ac80 <multi_cpu_increment>, 
+    static decrement_fn_ = 0x30aca0 <multi_cpu_decrement>, static exchange_fn_ = 0x30acc0 <multi_cpu_exchange>, 
+    static exchange_add_fn_ = 0x30acd0 <multi_cpu_exchange_add>}, priority_ = 0, reactor_ = 0x806f500, 
+  reference_counting_policy_ = {<ACE_Event_Handler::Policy> = {_vptr.Policy = 0x3dd638}, 
+    value_ = ACE_Event_Handler::Reference_Counting_Policy::DISABLED}}
+(gdb) step
+Handler::handle_exception (this=0xb7fec264, h=-1) at server99.cpp:292
+292         if (ACE_INVALID_HANDLE == h)
+(gdb) p this
+$8 = (Handler * const) 0xb7fec264
+(gdb) p *this
+$9 = {<ACE_Event_Handler> = {_vptr.ACE_Event_Handler = 0x805ff08, reference_count_ = {value_ = 1, 
+      static increment_fn_ = 0x30ac80 <multi_cpu_increment>, static decrement_fn_ = 0x30aca0 <multi_cpu_decrement>, 
+      static exchange_fn_ = 0x30acc0 <multi_cpu_exchange>, static exchange_add_fn_ = 0x30acd0 <multi_cpu_exchange_add>}, priority_ = 0, 
+    reactor_ = 0x806f500, reference_counting_policy_ = {<ACE_Event_Handler::Policy> = {_vptr.Policy = 0x3dd638}, 
+      value_ = ACE_Event_Handler::Reference_Counting_Policy::DISABLED}}, dgramt_ = {<ACE_SOCK> = {<ACE_IPC_SAP> = {handle_ = 7, 
+        static pid_ = 0}, <No data fields>}, <No data fields>}, addr_ = {<ACE_Addr> = {_vptr.ACE_Addr = 0x3dd708, static sap_any = {
+        _vptr.ACE_Addr = 0x3dc838, static sap_any = <same as static member of an already seen type>, addr_type_ = -1, addr_size_ = -1}, 
+      addr_type_ = 2, addr_size_ = 16}, inet_addr_ = {in4_ = {sin_family = 2, sin_port = 35865, sin_addr = {s_addr = 0}, 
+        sin_zero = "\000\000\000\000\000\000\000"}}}, static recv_count = 2, static exit_flag = 0}
+(gdb) p this->exit_flag 
+$10 = 0
+(gdb) n
+294             ACE_DEBUG ((LM_INFO, ACE_TEXT ("(%t) handle_exception: handle the exit handler\n")));
+(gdb) 
+(3086928752) handle_exception: handle the exit handler
+295             exit_flag = 1;
+(gdb) 
+298         return 0;
+(gdb) p this->exit_flag 
+$11 = 1
+(gdb) bt
+#0  Handler::handle_exception (this=0xb7fec264, h=-1) at server99.cpp:298
+#1  0x0037aac8 in ACE_Select_Reactor_Notify::dispatch_notify (this=0x806e4c8, buffer=...) at ../../ace/Select_Reactor_Base.cpp:843
+#2  0x0037a69b in ACE_Select_Reactor_Notify::handle_input (this=0x806e4c8, handle=5) at ../../ace/Select_Reactor_Base.cpp:923
+#3  0x0037b819 in ACE_Select_Reactor_Notify::dispatch_notifications (this=0x806e4c8, number_of_active_handles=@0xb7fec164, rd_mask=...)
+    at ../../ace/Select_Reactor_Base.cpp:746
+#4  0x0805c9a4 in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch_notification_handlers (this=0x806dba8, dispatch_set=..., 
+    number_of_active_handles=@0xb7fec164, number_of_handlers_dispatched=@0xb7fec148) at /usr/local/include/ace/Select_Reactor_T.cpp:1162
+#5  0x0805c8a9 in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::dispatch (this=0x806dba8, active_handle_count=0, dispatch_set=...)
+    at /usr/local/include/ace/Select_Reactor_T.cpp:1353
+#6  0x0805e324 in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events_i (this=0x806dba8, max_wait_time=0x0)
+    at /usr/local/include/ace/Select_Reactor_T.cpp:1442
+#7  0x0805a3d7 in ACE_Select_Reactor_T<ACE_Reactor_Token_T<ACE_Token> >::handle_events (this=0x806dba8, max_wait_time=0x0)
+    at /usr/local/include/ace/Select_Reactor_T.cpp:1419
+#8  0x08055354 in ACE_Reactor::handle_events (this=0x806f500, max_wait_time=0x0) at /usr/local/include/ace/Reactor.inl:188
+#9  0x080535aa in MyTask::svc (this=0x806b774) at server99.cpp:176
+#10 0x00393b52 in ACE_Task_Base::svc_run (args=0x806b774) at ../../ace/Task.cpp:275
+#11 0x00394eed in ACE_Thread_Adapter::invoke_i (this=0x806b9f0) at ../../ace/Thread_Adapter.cpp:149
+#12 0x00394f65 in ACE_Thread_Adapter::invoke (this=0x806b9f0) at ../../ace/Thread_Adapter.cpp:98
+#13 0x0030b5c1 in ace_thread_adapter (args=0x806b9f0) at ../../ace/Base_Thread_Adapter.cpp:124
+#14 0x0011580e in start_thread () from /lib/tls/i686/cmov/libpthread.so.0
+#15 0x001f57ee in clone () from /lib/tls/i686/cmov/libc.so.6
+(gdb) b server99.cpp:177
+Breakpoint 6 at 0x80535ad: file server99.cpp, line 177.
+(gdb) c
+Continuing.
+
+Breakpoint 6, MyTask::svc (this=0x806b774) at server99.cpp:177
+177             if (result)
+(gdb) p result 
+$12 = 1
+(gdb) p selector 
+$13 = (ACE_Select_Reactor *) 0x806dba8
+(gdb) p reactor
+$14 = (class ACE_Reactor *) 0x806f500
+(gdb) n
+179                 ACE_DEBUG ((LM_INFO, ACE_TEXT ("(%t) handle_events() succeed, result = %d\n\n"), result));
+(gdb) 
+(3086928752) handle_events() succeed, result = 1
+
+180                 if (RECV_COUNT == handler.get_count())
+(gdb) 
+182                     ACE_DEBUG ((LM_INFO, ACE_TEXT ("(%t) MyTask::svc() notify the exit handler\n")));
+(gdb) 
+(3086928752) MyTask::svc() notify the exit handler
+
+Breakpoint 2, MyTask::svc (this=0x806b774) at server99.cpp:183
+183                     ACE_Reactor::instance()->notify(&handler, ACE_Event_Handler::EXCEPT_MASK);
+(gdb) c
+Continuing.
+(3086928752) exit MyTask::svc()
+
+(3086928752) in ~Handler()
+
+(3086931664) main::end
+
+$ input command >[Thread 0xb7fecb70 (LWP 4308) exited]
+q
+
+Program exited normally.
+(gdb) q
